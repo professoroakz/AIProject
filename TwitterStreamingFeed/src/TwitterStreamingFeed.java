@@ -32,12 +32,12 @@ public class TwitterStreamingFeed {
     }
 
     public void loadMenu() throws InterruptedException {
-        System.out.print("Choose the company you want to collect tweets about. \n 1: Microsoft \n 2: Netflix \n 3: Walmart\n");
+        System.out.print("Press 1 to start collecting tweets");
         Scanner input = new Scanner(System.in);
         int keyword = Integer.parseInt(input.nextLine());
         System.out.println("Your choice is: " + keyword);
         input.close();
-        switch(keyword){
+        switch(keyword) {
             case 1:
                 companyChoice = "Microsoft";
                 // OktayGardener keys
@@ -46,7 +46,7 @@ public class TwitterStreamingFeed {
                 accessToken         = "29536418-w8pU1DCRlhNVPvxF9cTe8iCizVadmDffY8xRCILBl";
                 tokenSecret         = "y9Zraq20zz6rmHBYvFri1gM1kcSPxryC82BlEnywxYz6m";
                 keywords = new String[]
-                        {"martian"};
+                        {"Big bang Theory", "Walking Dead", "South Park"};
                 System.out.println("Now listening for tweets about.. " + companyChoice);
                 break;
             case 2:
@@ -89,7 +89,7 @@ public class TwitterStreamingFeed {
             public void onStatus(Status status) {
                 // Print some tweet data to terminal window (output)
                 // Make sure that the language is english
-                if( status.getLang().equals("en")) {
+                if(status.getLang().equals("en")) {
                 System.out.println("@" + status.getUser().getScreenName() + ": " + status.getText() +
                         "\nuser_location: " + status.getUser().getLocation() +
                         "\ncreated_at: " + status.getCreatedAt() + "\n" +
@@ -108,8 +108,13 @@ public class TwitterStreamingFeed {
                     basicObj.put("tweet_mentioned_count", mentioned.length);
                     basicObj.put("tweet_ID", status.getId());
                     basicObj.put("tweet_text", status.getText());
+                    for(String key : keywords) {
+                        if(status.getText().toLowerCase().contains(key.toLowerCase())) {
+                            basicObj.put("show_title", key);
+                        }
+                    }
 
-                    basicObj.put("company", companyChoice);
+                 //   basicObj.put("company", companyChoice);
 
                     // Insert the information into mongoDB
                     try {
@@ -176,7 +181,7 @@ public class TwitterStreamingFeed {
             System.out.println("Connecting to Mongo DB..");
             //Mongo mongo;
             //mongo = new Mongo("localhost");
-            uri = new MongoClientURI("mongodb://localhost/dd143x");
+            uri = new MongoClientURI("mongodb://localhost/movieratings");
             client = new MongoClient(uri);
         } catch (UnknownHostException ex) {
             System.out.println("MongoDB Connection Error :" + ex.getMessage());
