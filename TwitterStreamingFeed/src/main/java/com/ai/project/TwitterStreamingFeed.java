@@ -138,7 +138,6 @@ public class TwitterStreamingFeed {
                 System.out.println("Got scrub_geo event userId:" + userId + " upToStatusId:" + upToStatusId);
             }
 
-            @Override
             public void onStallWarning(StallWarning stallWarning) {
                 //To change body of implemented methods use File | Settings | File Templates.
             }
