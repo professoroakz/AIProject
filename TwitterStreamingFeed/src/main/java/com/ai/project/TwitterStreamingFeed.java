@@ -34,9 +34,7 @@ public class TwitterStreamingFeed {
     }
 
     public void loadMenu() throws InterruptedException {
-        System.out.print("Press 1 to start collecting tweets");
         Scanner input = new Scanner(System.in);
-        System.out.println("Your choice is: " + keyword);
         input.close();
         companyChoice = "TV Shows";
         // OktayGardener keys
