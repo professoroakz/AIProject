@@ -36,49 +36,24 @@ public class TwitterStreamingFeed {
     public void loadMenu() throws InterruptedException {
         System.out.print("Press 1 to start collecting tweets");
         Scanner input = new Scanner(System.in);
-        int keyword = Integer.parseInt(input.nextLine());
         System.out.println("Your choice is: " + keyword);
         input.close();
-        switch(keyword) {
-            case 1:
-                companyChoice = "TV Shows";
-                // OktayGardener keys
-                consumerKey         = "NnzBdGJvRLBqJJwpSo3EuG0YK";
-                consumerSecret      = "e4vv9S0ojWMpwyAa4eKNPlt7qg2GkgKOAXGJJTHnRZyVAwBw6I";
-                accessToken         = "29536418-w8pU1DCRlhNVPvxF9cTe8iCizVadmDffY8xRCILBl";
-                tokenSecret         = "y9Zraq20zz6rmHBYvFri1gM1kcSPxryC82BlEnywxYz6m";
-                keywords = new String[]
-                        {"Big bang Theory",
-                        "Walking Dead",
-                        "South Park",
-                        "American Horror Story",
-                        "Modern Family",
-                        "Heroes Reborn",
-                        "Family Guy",
-                        "Arrow"};
-                System.out.println("Now listening for tweets about.. " + companyChoice);
-                break;
-            case 2:
-                companyChoice = "Netflix";
-                // AdamGarrtner
-                consumerKey         = "yzaRYk8pdlhizPZs5M9xD4H7E";
-                consumerSecret      = "tx8wYlve1xbXUZeKuzMXdOMwi2ukDjKKvauaPLXXRh72wOIfc2";
-                accessToken         = "3110546470-0hSR2B8AvjnDa6YTafEWclmEKxJORTLu6OmCf3q";
-                tokenSecret         = "tqHiLGZxRE5onQ1SdwgsNIfiOCzaZxOlLsPS2SCTsKEJH";
-                keywords = new String[] {"TWD", "the walking dead"};
-                System.out.println("Now listening for tweets about.. " + companyChoice);
-                break;
-            case 3:
-                companyChoice = "Walmart";
-                // Oscar's Keys
-                consumerKey         = "nv6pY73cwiwA857jnIHMrzt4M";
-                consumerSecret      = "0dL2LzHqlbvThxmFryXDMdgRTKsyZ3VfCWpPibyXCuvirh82dB";
-                accessToken         = "3003074746-fgcqYFx2OEl3WaZnBLOVQUr6Z5tnSBBEig1sADN";
-                tokenSecret         = "QfVqLNHIfezEwA7wXDjRJFEwT63niXWKlPmnLA2TMTR9k";
-                keywords = new String[] {"big bang theory", "TBBT"};
-                System.out.println("Now listening for tweets about.. " + companyChoice);
-                break;
-        }
+        companyChoice = "TV Shows";
+        // OktayGardener keys
+        consumerKey         = "NnzBdGJvRLBqJJwpSo3EuG0YK";
+        consumerSecret      = "e4vv9S0ojWMpwyAa4eKNPlt7qg2GkgKOAXGJJTHnRZyVAwBw6I";
+        accessToken         = "29536418-w8pU1DCRlhNVPvxF9cTe8iCizVadmDffY8xRCILBl";
+        tokenSecret         = "y9Zraq20zz6rmHBYvFri1gM1kcSPxryC82BlEnywxYz6m";
+        keywords = new String[]
+                {"Big bang Theory",
+                "Walking Dead",
+                "South Park",
+                "American Horror Story",
+                "Modern Family",
+                "Heroes Reborn",
+                "Family Guy",
+                "Arrow"};
+        System.out.println("Now listening for tweets about.. " + companyChoice);
 
         // Connect to the database
         connectToDB();
