@@ -41,14 +41,21 @@ public class TwitterStreamingFeed {
         input.close();
         switch(keyword) {
             case 1:
-                companyChoice = "Microsoft";
+                companyChoice = "TV Shows";
                 // OktayGardener keys
                 consumerKey         = "NnzBdGJvRLBqJJwpSo3EuG0YK";
                 consumerSecret      = "e4vv9S0ojWMpwyAa4eKNPlt7qg2GkgKOAXGJJTHnRZyVAwBw6I";
                 accessToken         = "29536418-w8pU1DCRlhNVPvxF9cTe8iCizVadmDffY8xRCILBl";
                 tokenSecret         = "y9Zraq20zz6rmHBYvFri1gM1kcSPxryC82BlEnywxYz6m";
                 keywords = new String[]
-                        {"Big bang Theory", "Walking Dead", "South Park"};
+                        {"Big bang Theory",
+                        "Walking Dead",
+                        "South Park",
+                        "American Horror Story",
+                        "Modern Family",
+                        "Heroes Reborn",
+                        "Family Guy",
+                        "Arrow"};
                 System.out.println("Now listening for tweets about.. " + companyChoice);
                 break;
             case 2:
