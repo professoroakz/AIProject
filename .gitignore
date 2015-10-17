@@ -3,5 +3,9 @@
 *.class
 *.pyc
 
+# IntelliJ
+*.iml
 /.idea
+
+# Maven
 /target
