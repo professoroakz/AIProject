@@ -96,7 +96,6 @@ public class TwitterStreamingFeed {
                             "\nuser_location: " + status.getUser().getLocation() +
                             "\ncreated_at: " + status.getCreatedAt() + "\n" +
                             "language:: " + status.getLang());
-
                     // JSON object
                     BasicDBObject basicObj = new BasicDBObject();
                     // Information from the status (tweet)
@@ -110,8 +109,13 @@ public class TwitterStreamingFeed {
                     basicObj.put("tweet_mentioned_count", mentioned.length);
                     basicObj.put("tweet_ID", status.getId());
                     basicObj.put("tweet_text", status.getText());
+                    for(String key : keywords) {
+                        if(status.getText().toLowerCase().contains(key.toLowerCase())) {
+                            basicObj.put("show_title", key);
+                        }
+                    }
 
-                    basicObj.put("company", companyChoice);
+                 //   basicObj.put("company", companyChoice);
 
                     // Insert the information into mongoDB
                     try {
