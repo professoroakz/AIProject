@@ -1,6 +1,8 @@
 /**
  * Created by oktaygardener on 23/03/15.
  */
+package com.ai.project;
+
 import com.mongodb.*;
 import java.net.UnknownHostException;
 
