@@ -55,23 +55,13 @@ public class TwitterStreamingFeed {
                 "Arrow"};
         handles = new HashMap<String, String[]>();
         handles.put(keywords[0], new String[]{"bigbang_cbs"});
-        handles.put(keywords[1], new String[]{"twd"});
+        handles.put(keywords[1], new String[]{"twd", "walkingdead"});
         handles.put(keywords[2], new String[]{"southpark"});
         handles.put(keywords[3], new String[]{"ahsfx"});
         handles.put(keywords[4], new String[]{"heroes", "heroesreborn"});
         handles.put(keywords[5], new String[]{"modernfam"});
         handles.put(keywords[6], new String[]{"familyguy"});
         handles.put(keywords[7], new String[]{"cw_arrow"});
-//        {"bigbang_cbs",
-//                "twd",
-//                "southpark",
-//                "ahsfx",
-//                "heroes",
-//                "heroesreborn",
-//                "modernfam",
-//                "familyguy",
-//                "cw_arrow"
-//        };
         System.out.println("Now listening for tweets about.. " + companyChoice);
 
         // Connect to the database
@@ -191,11 +181,9 @@ public class TwitterStreamingFeed {
         for(String key : keywords) {
             if(lowerCaseText.contains(key.toLowerCase())) {
                 title = key;
-                System.out.println("Determined title from text");
             }
         }
         if (title == null) {
-            System.out.println("Finding title from handle");
             title = titleFromHandles(lowerCaseText);
         }
         if (title == null) {
