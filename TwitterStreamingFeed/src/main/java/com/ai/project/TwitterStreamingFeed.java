@@ -19,6 +19,7 @@ public class TwitterStreamingFeed {
     private MongoClientURI uri;
     // Keywords for the Twitter query
     public String[] keywords;
+    public String[] handles;
     public String consumerKey;
     public String consumerSecret;
     public String accessToken;
@@ -51,6 +52,16 @@ public class TwitterStreamingFeed {
                 "Heroes Reborn",
                 "Family Guy",
                 "Arrow"};
+        handles = new String[] {"bigbang_cbs",
+                "twd",
+                "southpark",
+                "ahsfx",
+                "heroes",
+                "heroesreborn",
+                "modernfam",
+                "familyguy",
+                "cw_arrow"
+        };
         System.out.println("Now listening for tweets about.. " + companyChoice);
 
         // Connect to the database
@@ -69,6 +80,7 @@ public class TwitterStreamingFeed {
         StatusListener listener = new StatusListener() {
 
             public void onStatus(Status status) {
+                String text;
                 // Print some tweet data to terminal window (output)
                 // Make sure that the language is english
                 if( status.getLang().equals("en")) {
@@ -90,7 +102,9 @@ public class TwitterStreamingFeed {
                     basicObj.put("tweet_ID", status.getId());
                     basicObj.put("tweet_text", status.getText());
                     for(String key : keywords) {
-                        if(status.getText().toLowerCase().contains(key.toLowerCase())) {
+                        text = status.getText().toLowerCase();
+                        if(text.contains(key.toLowerCase()) ||
+                                containsHandle(text)) {
                             basicObj.put("show_title", key);
                         }
                     }
@@ -166,5 +180,16 @@ public class TwitterStreamingFeed {
         } catch (UnknownHostException ex) {
             System.out.println("MongoDB Connection Error :" + ex.getMessage());
         }
+    }
+
+    private boolean containsHandle(String lowercaseText) {
+        boolean hasHandle = false;
+        int index = 0;
+
+        while (!hasHandle && index < handles.length) {
+            hasHandle = lowercaseText.contains(handles[index]);
+        }
+
+        return hasHandle;
     }
 }
