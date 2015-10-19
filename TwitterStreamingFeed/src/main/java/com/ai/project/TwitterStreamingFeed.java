@@ -190,7 +190,7 @@ public class TwitterStreamingFeed {
         int index = 0;
 
         while (!hasHandle && index < handles.length) {
-            hasHandle = lowercaseText.contains(handles[index]);
+            hasHandle = lowercaseText.contains(handles[index++]);
         }
 
         return hasHandle;
