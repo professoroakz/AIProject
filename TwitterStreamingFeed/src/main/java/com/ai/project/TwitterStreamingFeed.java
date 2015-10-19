@@ -4,6 +4,7 @@
 package com.ai.project;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Scanner;
 import com.mongodb.*;
 import twitter4j.*;
@@ -19,7 +20,7 @@ public class TwitterStreamingFeed {
     private MongoClientURI uri;
     // Keywords for the Twitter query
     public String[] keywords;
-    public String[] handles;
+    public HashMap<String, String[]> handles;
     public String consumerKey;
     public String consumerSecret;
     public String accessToken;
@@ -52,16 +53,25 @@ public class TwitterStreamingFeed {
                 "Heroes Reborn",
                 "Family Guy",
                 "Arrow"};
-        handles = new String[] {"bigbang_cbs",
-                "twd",
-                "southpark",
-                "ahsfx",
-                "heroes",
-                "heroesreborn",
-                "modernfam",
-                "familyguy",
-                "cw_arrow"
-        };
+        handles = new HashMap<String, String[]>();
+        handles.put(keywords[0], new String[]{"bigbang_cbs"});
+        handles.put(keywords[1], new String[]{"twd"});
+        handles.put(keywords[2], new String[]{"southpark"});
+        handles.put(keywords[3], new String[]{"ahsfx"});
+        handles.put(keywords[4], new String[]{"heroes", "heroesreborn"});
+        handles.put(keywords[5], new String[]{"modernfam"});
+        handles.put(keywords[6], new String[]{"familyguy"});
+        handles.put(keywords[7], new String[]{"cw_arrow"});
+//        {"bigbang_cbs",
+//                "twd",
+//                "southpark",
+//                "ahsfx",
+//                "heroes",
+//                "heroesreborn",
+//                "modernfam",
+//                "familyguy",
+//                "cw_arrow"
+//        };
         System.out.println("Now listening for tweets about.. " + companyChoice);
 
         // Connect to the database
@@ -80,7 +90,7 @@ public class TwitterStreamingFeed {
         StatusListener listener = new StatusListener() {
 
             public void onStatus(Status status) {
-                String text;
+                String text, showTitle;
                 // Print some tweet data to terminal window (output)
                 // Make sure that the language is english
                 if( status.getLang().equals("en")) {
@@ -101,18 +111,7 @@ public class TwitterStreamingFeed {
                     basicObj.put("tweet_mentioned_count", mentioned.length);
                     basicObj.put("tweet_ID", status.getId());
                     basicObj.put("tweet_text", status.getText());
-                    for(String key : keywords) {
-                        text = status.getText().toLowerCase();
-                        if(text.contains(key.toLowerCase()) ||
-                                containsHandle(text)) {
-                            basicObj.put("show_title", key);
-                        }
-                    }
-                    if (basicObj.get("show_title") == null) {
-                        basicObj.put("show_title", "undetermined");
-                    }
-
-                 //   basicObj.put("company", companyChoice);
+                    basicObj.put("show_title", getShowTitle(status, status.getText()));
 
                     // Insert the information into mongoDB
                     try {
@@ -185,14 +184,34 @@ public class TwitterStreamingFeed {
         }
     }
 
-    private boolean containsHandle(String lowercaseText) {
-        boolean hasHandle = false;
-        int index = 0;
+    private String getShowTitle(Status status, String text) {
+        String title = null;
+        String lowerCaseText = text.toLowerCase();
 
-        while (!hasHandle && index < handles.length) {
-            hasHandle = lowercaseText.contains(handles[index++]);
+        for(String key : keywords) {
+            if(lowerCaseText.contains(key.toLowerCase())) {
+                title = key;
+            }
+        }
+        if (title == null) {
+            title = titleFromHandles(lowerCaseText);
+        }
+        if (title == null) {
+            title = "undetermined";
         }
 
-        return hasHandle;
+        return title;
+    }
+
+    private String titleFromHandles(String lowercaseText) {
+        for (String showTitle : handles.keySet()) {
+            for (String handle : handles.get(showTitle)) {
+                if (lowercaseText.contains(handle)) {
+                    return showTitle;
+                }
+            }
+        }
+
+        return null;
     }
 }
