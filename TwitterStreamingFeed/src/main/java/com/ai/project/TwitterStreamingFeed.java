@@ -191,12 +191,15 @@ public class TwitterStreamingFeed {
         for(String key : keywords) {
             if(lowerCaseText.contains(key.toLowerCase())) {
                 title = key;
+                System.out.println("Determined title from text");
             }
         }
         if (title == null) {
+            System.out.println("Finding title from handle");
             title = titleFromHandles(lowerCaseText);
         }
         if (title == null) {
+            System.out.println("Title undetermined");
             title = "undetermined";
         }
 
