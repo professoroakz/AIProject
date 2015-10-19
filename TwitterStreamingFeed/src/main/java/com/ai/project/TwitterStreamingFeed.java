@@ -108,6 +108,9 @@ public class TwitterStreamingFeed {
                             basicObj.put("show_title", key);
                         }
                     }
+                    if (basicObj.get("show_title") == null) {
+                        basicObj.put("show_title", "undetermined");
+                    }
 
                  //   basicObj.put("company", companyChoice);
 
