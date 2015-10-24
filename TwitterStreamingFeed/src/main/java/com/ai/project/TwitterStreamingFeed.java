@@ -82,9 +82,7 @@ public class TwitterStreamingFeed {
         handles.put(keywords[4], new String[]{"heroes", "heroesreborn"});
         handles.put(keywords[5], new String[]{"modernfam"});
         handles.put(keywords[6], new String[]{"familyguy"});
-        handles.put(keywords[7], new String[]{
-            "cw_arrow"
-        });
+        handles.put(keywords[7], new String[]{"cw_arrow"});
         System.out.println("Now listening for tweets about.. " + companyChoice);
 
         // Connect to the database

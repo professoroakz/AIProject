@@ -14,6 +14,14 @@ import java.util.List;
 public class TwitterSearchPoll {
     public static final String TV_SHOW_TAGS = "#thewalkingdead OR walking dead OR big bang theory" +
             "OR south park OR american horror story OR modern family OR heroes reborn OR family guy OR #arrow";
+    public static final String[] TV_SHOWS = {"Big bang Theory",
+            "Walking Dead",
+            "South Park",
+            "American Horror Story",
+            "Modern Family",
+            "Heroes Reborn",
+            "Family Guy",
+            "Arrow"};
 
     private static final long ONE_DAY = 1000 * 60 * 60 * 24;
     private static final String twdQuery = "#thewalkingdead since:2015-10-18 until:2015-10-19";
@@ -24,12 +32,12 @@ public class TwitterSearchPoll {
         twitterStream = new TwitterStreamingFeed();
     }
 
-    public void pollTwitter() {
+    public void pollTwitter(String search) {
+        // TODO: modify to query for one show every 15 minutes until all shows have been queried for.
         try {
-            String query = buildQuery(TV_SHOW_TAGS);
+            String query = buildQuery(search);
             searchTwitter(query);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             System.err.println("Error querying for TWD tweets");
         }
     }
@@ -53,8 +61,8 @@ public class TwitterSearchPoll {
 
     private void searchTwitter(String searchQuery) throws IOException {
         try {
-            TwitterFactory tf = new TwitterFactory (twitterStream.getConfig());
-            Twitter twitter = tf.getInstance ();
+            TwitterFactory tf = new TwitterFactory(twitterStream.getConfig());
+            Twitter twitter = tf.getInstance();
 
             Query query = new Query(searchQuery);
             QueryResult result = twitter.search(query);
@@ -71,20 +79,26 @@ public class TwitterSearchPoll {
                 if (query != null) {
                     result = twitter.search(query);
                 }
-            } while(query != null);
-        }
-        catch (TwitterException ex) {
+            } while (query != null);
+        } catch (TwitterException ex) {
             System.err.println("Unable to access Twitter: " + ex.getMessage());
         }
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
+        long timeOffset = 0;
+        long twentyMinutes = 1000 * 60 * 20;
         TwitterSearchPoll searchPoll = new TwitterSearchPoll();
         searchPoll.load();
 
         while (true) {
-            searchPoll.pollTwitter();
-            Thread.sleep(ONE_DAY);
+            for (String show : TV_SHOWS) {
+                searchPoll.pollTwitter(show);
+                timeOffset += twentyMinutes;
+                Thread.sleep(twentyMinutes);
+            }
+            Thread.sleep(ONE_DAY - timeOffset);
+            timeOffset = 0;
         }
     }
 }
