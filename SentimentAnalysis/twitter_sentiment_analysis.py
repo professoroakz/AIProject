@@ -1,7 +1,6 @@
 import pandas as pd
 import nltk
-from numpy import *
-from bs4 import BeautifulSoup   
+from numpy import * 
 import re
 import nltk
 from nltk.corpus import stopwords
@@ -61,11 +60,10 @@ def extract_features(path,n):
 #Cleans up a tweet - review is from when this was for IMDB
 def review_to_words( raw_review ):
 
-    #Just the text part of the review
-    review_text = BeautifulSoup(raw_review).get_text() 
+    no_url = re.sub("http[s]??://.+?\\..+?[ ]?", "", raw_review)
 
     #Remove numerics
-    letters_only = re.sub("[^a-zA-Z]", " ", review_text) 
+    letters_only = re.sub("[^a-zA-Z]", " ", no_url) 
 
     #to lowercase
     words = letters_only.lower().split()                             
