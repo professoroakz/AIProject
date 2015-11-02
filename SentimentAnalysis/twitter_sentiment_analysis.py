@@ -15,6 +15,28 @@ import pickle
 import pymongo
 from pymongo import MongoClient
 
+
+#model needs to be a model from sklearn or obj with function that can predict
+#right now model = random forest, features = bag of words
+def sentiment(model , features):
+        sent = model.predict(features)
+
+        total = sent.shape[0]
+
+        prop_pos = sum(sent) / total
+        prop_neg = 1 - prop_pos
+
+        return prop_pos,prop_neg,total
+
+#vectorizer is something we learn at training time
+#includes vocab and other things
+#tweets - a list 
+def process_raw_tweet(vectorizer, tweets):
+
+        test_data_features = vectorizer.transform(tweets)
+        test_data_features = test_data_features.toarray()
+        return test_data_features
+
 #Reads and Cleans  'n' tweets from corpus so we don't need to read everything
 #each time we train
 def extract_features(path,n):
@@ -156,8 +178,13 @@ def readFromMongo():
 		else:
 			break
 		counter +=1
-	print len(tweet_text)
+	
+	model = pickle.load( open( "/root/random_forest.p", "rb" ) )
+        vectorizer = pickle.load( open( "/root/vectorizer.p", "rb" ) )
 
+	cleaned_tweets =process_raw_tweet(vectorizer,  [review_to_words(text) for text in tweet_text ] )
+
+	print sentiment(model,cleaned_tweets)
 
 if __name__ == '__main__':
     
