@@ -11,3 +11,10 @@
 /target
 
 keys.cfg
+
+# Django
+env
+*.DS_Store
+*.pyc
+__pycache__
+db.sqlite3

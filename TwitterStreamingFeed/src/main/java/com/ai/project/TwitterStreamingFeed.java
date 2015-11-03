@@ -102,14 +102,18 @@ public class TwitterStreamingFeed {
     }
 
     public void pushStatusToDB(Status status) {
-        String text, showTitle;
-        // Print some tweet data to terminal window (output)
+        if (status.getLang().equals("en")) {
+            pushStatusToDB(status, getShowTitle(status.getText()));
+        }
+    }
+
+    public void pushStatusToDB(Status status, String showTitle) {
         // Make sure that the language is english
         if (status.getLang().equals("en")) {
             System.out.println("@" + status.getUser().getScreenName() + ": " + status.getText() +
-                    "\nuser_location: " + status.getUser().getLocation() +
-                    "\ncreated_at: " + status.getCreatedAt() + "\n" +
-                    "language:: " + status.getLang());
+                "\nuser_location: " + status.getUser().getLocation() +
+                "\ncreated_at: " + status.getCreatedAt() + "\n" +
+                "language:: " + status.getLang());
             // JSON object
             BasicDBObject basicObj = new BasicDBObject();
             // Information from the status (tweet)
@@ -123,7 +127,7 @@ public class TwitterStreamingFeed {
             basicObj.put("tweet_mentioned_count", mentioned.length);
             basicObj.put("tweet_ID", status.getId());
             basicObj.put("tweet_text", status.getText());
-            basicObj.put("show_title", getShowTitle(status, status.getText()));
+            basicObj.put("show_title", showTitle);
 
             // Insert the information into mongoDB
             try {
@@ -165,7 +169,7 @@ public class TwitterStreamingFeed {
                     basicObj.put("tweet_mentioned_count", mentioned.length);
                     basicObj.put("tweet_ID", status.getId());
                     basicObj.put("tweet_text", status.getText());
-                    basicObj.put("show_title", getShowTitle(status, status.getText()));
+                    basicObj.put("show_title", getShowTitle(status.getText()));
 
                     // Insert the information into mongoDB
                     try {
@@ -238,7 +242,7 @@ public class TwitterStreamingFeed {
         }
     }
 
-    private String getShowTitle(Status status, String text) {
+    private String getShowTitle(String text) {
         String title = null;
         String lowerCaseText = text.toLowerCase();
 
