@@ -164,28 +164,41 @@ def sentiment_analysis(path,n,k):
     
     return forest,vectorizer
 
-def readFromMongo():
+#show - a string of the name of the show
+#limit - how many tweets to pull
+def readFromMongo(show, limit):
+
+	#Connect to mongo
 	client = MongoClient()
+
+	#access movie stream db
 	movies = client['movieratings_stream']
+
+	#colletion of tweets
 	tweets = movies['tweets']
 
-	limit = 1000
 	tweet_text = []
 	counter = 0
-	for tweet in tweets.find():
+	
+	#iterate through cursor that takes the 'limit' most recent tweets with hashtag 'show' 
+	for tweet in tweets.find({'show_title' : show}).sort('created_at', pymongo.DESCENDING):
 		if counter < limit:
-			tweet_text.append(tweet['tweet_text'])
+ 	        	tweet_text.append(tweet)
+			counter +=1
 		else:
 			break
-		counter +=1
+		
+	
+	
 	
 	model = pickle.load( open( "/root/random_forest.p", "rb" ) )
         vectorizer = pickle.load( open( "/root/vectorizer.p", "rb" ) )
+	
 
-	cleaned_tweets =process_raw_tweet(vectorizer,  [review_to_words(text) for text in tweet_text ] )
+	cleaned_tweets =process_raw_tweet(vectorizer,  [review_to_words(tweet['tweet_text']) for tweet in tweet_text ] )
 
 	print sentiment(model,cleaned_tweets)
-
+	
 if __name__ == '__main__':
     
     #DataFrame Structure for the trianingf file
@@ -202,6 +215,9 @@ if __name__ == '__main__':
     #extract_features(path,n)
     #[model,vectorizer] = sentiment_analysis(path,n,k)
     #test_model(path,n,model.predict,vectorizer)
-    
-	readFromMongo()
+    show = 'American Horror Story'
+    limit = 1000
+    readFromMongo(show,limit)
+
 	
+
