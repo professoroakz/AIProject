@@ -1,0 +1,34 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Twitter TV Ratings Prediction</title>
+
+  <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-3.3.5-dist/css/bootstrap.min.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
+
+  <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script type="text/javascript" src="{% static 'bootstrap-3.3.5-dist/js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+<div class="container">
+  <h1 class="h1" align="center">Twitter TV Ratings Predictor</h1>
+  <hr>
+  <div>
+    <form method="get" action="/search/">
+      <div class="input-group">
+        <input class="form-control" type="text" name="q" id="id_q" placeholder="Search"/>
+        <span class="input-group-addon">
+          <input type="submit" value="Submit"/>
+        </span>
+      </div>
+    </form>
+  </div>
+  {% block content %}
+  {% endblock %}
+</div>
+</body>
+</html>
