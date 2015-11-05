@@ -1,27 +1,41 @@
 
 import imdb
 from twitter_sentiment_analysis import SentimentAnalysis
+from sklearn import linear_model
+from numpy import *
 
-if __name__ == '__main__':
 
-    shows = ["Big bang Theory","Walking Dead","South Park","American Horror Story","Modern Family","Heroes Reborn","Family Guy","Arrow"]
-    sample_size =100
 
+def regression_model(shows,sample_size):
+    #shows = ["Big bang Theory","Walking Dead","South Park","American Horror Story","Modern Family","Heroes Reborn","Family Guy","Arrow"]
+    #sample_size =10000
     sa = SentimentAnalysis()
     ia = imdb.IMDb()
+    model = linear_model.LinearRegression()
 
-    s_result = ia.search_movie(shows[0])
-
-    '''
+    ratings = []
+    sentiment = []
     for show in shows:
-        #print sa.readFromMongo(show,sample_size)
         s_result = ia.search_movie(show)
+        episode = s_result[0]
+        ia.update(episode)
 
-        #for item in s_result:
-        #   print item['long imdb canonical title'], item['runtime'] , iterm['rating']
+        sent = sa.readFromMongo(show,sample_size)
 
-        the_unt = s_result[0]
-        ia.update(the_unt)
-        print the_unt['runtime']
-        print the_unt['rating']
-    '''
+        print sent
+        ratings.append(episode['rating'])
+        sentiment.append([ sent[0], sent[1] ])
+
+    ratings = array(ratings)
+    sentiment = array(sentiment)
+
+    model.fit(sentiment, ratings)
+    print model.score(sentiment,ratings)
+   
+
+if __name__ == '__main__':
+    shows = ["Big bang Theory","Walking Dead","South Park","American Horror Story","Modern Family","Heroes Reborn","Family Guy","Arrow"]
+    sample_size =10000
+
+    regression_model(shows,sample_size)
+
