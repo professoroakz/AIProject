@@ -22,7 +22,7 @@ def regression_model(shows,sample_size):
 
         sent = sa.readFromMongo(show,sample_size)
 
-        print sent
+        print(sent)
         ratings.append(episode['rating'])
         sentiment.append([ sent[0], sent[1] ])
 
@@ -30,8 +30,7 @@ def regression_model(shows,sample_size):
     sentiment = array(sentiment)
 
     model.fit(sentiment, ratings)
-    print model.score(sentiment,ratings)
-   
+    print(model.score(sentiment,ratings))
 
 if __name__ == '__main__':
     shows = ["Big bang Theory","Walking Dead","South Park","American Horror Story","Modern Family","Heroes Reborn","Family Guy","Arrow"]

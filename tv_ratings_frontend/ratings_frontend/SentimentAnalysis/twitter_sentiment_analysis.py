@@ -64,8 +64,8 @@ class SentimentAnalysis():
             clean_test_reviews_pos.append(review_to_words(train[5][i + 800000 + n]))
 
             if i % 10000 == 0:
-                print
-                i
+                print(i)
+
 
 
                 # Write everything to csv
@@ -102,8 +102,7 @@ class SentimentAnalysis():
     # predict is a funtion object that will predict sentiment
     def test_model(self, path, n, predict, vectorizer):
 
-        print
-        "Loading Test Data..."
+        print("Loading Test Data...")
         test_pos = pd.read_csv(path + "pos_tweets_test.csv", header=0, \
                                delimiter=',', quoting=3, engine='python')
 
@@ -112,10 +111,8 @@ class SentimentAnalysis():
 
         test = pd.concat([test_pos.iloc[0:n], test_neg.iloc[0:n]])
 
-        print
-        "Test data finished loading !"
-        print
-        "Processing Features ... "
+        print("Test data finished loading !")
+        print("Processing Features ... ")
 
         test_data_features = vectorizer.transform(test['0'].values.tolist())
         test_data_features = test_data_features.toarray()
@@ -132,12 +129,11 @@ class SentimentAnalysis():
 
             i = i + 1
 
-        print
-        "Percent Correct:   " + str(float((i - errors)) / i)
+        print("Percent Correct:   " + str(float((i - errors)) / i))
 
     def sentiment_analysis(self, path, n, k):
-        print
-        "Loading Data"
+        print("Loading Data")
+
         train_pos = pd.read_csv(path + "pos_tweets_train.csv", header=0, \
                                 delimiter=',', quoting=3, engine='python')
 
@@ -150,11 +146,10 @@ class SentimentAnalysis():
                                      stop_words=None, \
                                      max_features=k)
 
-        print
-        "Finished Loading!!!"
+        print("Finished Loading!!!")
 
-        print
-        "Processing Bag of Word Features"
+        print("Processing Bag of Word Features")
+
         train = pd.concat([train_pos.iloc[0:n], train_neg.iloc[0:n]])
         sentiment = zeros(2 * n)
         sentiment[0:n] = 1
@@ -162,8 +157,7 @@ class SentimentAnalysis():
         train_data_features = vectorizer.fit_transform(train['0'].values.tolist())
         train_data_features = train_data_features.toarray()
 
-        print
-        "Beginning Training"
+        print("Beginning Training")
         start = timeit.default_timer()
 
         forest = RandomForestClassifier(n_estimators=50)
@@ -171,8 +165,7 @@ class SentimentAnalysis():
 
         stop = timeit.default_timer()
 
-        print
-        "Training Finished!!! Total Time:  " + str(stop - start)
+        print("Training Finished!!! Total Time:  " + str(stop - start))
 
         return forest, vectorizer
 
