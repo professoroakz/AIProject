@@ -196,16 +196,14 @@ class SentimentAnalysis():
                 break
 
 
-        return "test"
-        #model = pickle.load(open("/root/random_forest.p", "rb"))
-        #vectorizer = pickle.load(open("/root/vectorizer.p", "rb"))
+        model = pickle.load(open("/root/rand_forest.p", "rb"))
 
-        #cleaned_tweets = self.process_raw_tweet(vectorizer,
-        #                                        [self.review_to_words(tweet['tweet_text']) for tweet in tweet_text])
+        vectorizer = pickle.load(open("/root/vectorizer.p", "rb"))
 
+        cleaned_tweets = self.process_raw_tweet(vectorizer,
+                                                [self.review_to_words(tweet['tweet_text']) for tweet in tweet_text])
 
-
-        #return self.sentiment(model, cleaned_tweets)
+        return self.sentiment(model, cleaned_tweets)
 
 
 if __name__ == '__main__':
@@ -226,10 +224,11 @@ if __name__ == '__main__':
 
     sa = SentimentAnalysis()
 
-    sa.extract_features(path,n)
-    # [model,vectorizer] = sentiment_analysis(path,n,k)
-    # test_model(path,n,model.predict,vectorizer)
-    #show = 'American Horror Story'
-    #limit = 1000
+    #sa.extract_features(path,n)
+    #[model,vectorizer] = sentiment_analysis(path,n,k)
+    #test_model(path,n,model.predict,vectorizer)
+    show = 'American Horror Story'
+    limit = 1000
+
     #sa = SentimentAnalysis()
-    #print(sa.readFromMongo(show, limit))
+    print(sa.readFromMongo(show, limit))
