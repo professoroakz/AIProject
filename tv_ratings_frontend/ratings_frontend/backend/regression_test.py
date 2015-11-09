@@ -4,8 +4,6 @@ from twitter_sentiment_analysis import SentimentAnalysis
 from sklearn import linear_model
 from numpy import *
 
-
-
 def regression_model(shows,sample_size):
     #shows = ["Big bang Theory","Walking Dead","South Park","American Horror Story","Modern Family","Heroes Reborn","Family Guy","Arrow"]
     #sample_size =10000
