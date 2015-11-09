@@ -42,12 +42,10 @@ class SentimentAnalysis():
     # Reads and Cleans  'n' tweets from corpus so we don't need to read everything
     # each time we train
     def extract_features(self, path, n):
-        print
-        "Loading Data..."
-        train = pd.read_csv("training.1600000.processed.noemoticon.csv", header=None, \
+        print("Loading Data...")
+        train = pd.read_csv(path + "training.1600000.processed.noemoticon.csv", header=None, \
                             delimiter='","', quoting=3, engine='python')
-        print
-        "Finished Loading!!!"
+        print("Finished Loading!!!")
 
         # Collect clean review for both positive and negative as well as training and test
         clean_train_reviews_neg = []
@@ -75,11 +73,11 @@ class SentimentAnalysis():
         test_pos_output = pd.DataFrame(data=clean_test_reviews_pos)
         test_neg_output = pd.DataFrame(data=clean_test_reviews_neg)
 
-        pos_output.to_csv(path + "pos_tweets_train.csv", index=False)
-        neg_output.to_csv(path + "neg_tweets_train.csv", index=False)
+        pos_output.to_csv(path + "data_subset/pos_tweets_train.csv", index=False)
+        neg_output.to_csv(path + "data_subset/neg_tweets_train.csv", index=False)
 
-        test_pos_output.to_csv(path + "pos_tweets_test.csv", index=False)
-        test_neg_output.to_csv(path + "neg_tweets_test.csv", index=False)
+        test_pos_output.to_csv(path + "data_subset/pos_tweets_test.csv", index=False)
+        test_neg_output.to_csv(path + "data_subset/neg_tweets_test.csv", index=False)
 
     # Cleans up a tweet - review is from when this was for IMDB
     def review_to_words(self, raw_review):
@@ -169,6 +167,10 @@ class SentimentAnalysis():
 
         return forest, vectorizer
 
+    def train_model(self,path,new_features,n=1000,k=2000):
+        if(new_features):
+            extract_features(path,n,k)
+
     # show - a string of the name of the show
     # limit - how many tweets to pull
     def readFromMongo(self, show, limit):
@@ -193,7 +195,9 @@ class SentimentAnalysis():
             else:
                 break
 
-        model = pickle.load(open("/root/random_forest.p", "rb"))
+
+        model = pickle.load(open("/root/rand_forest.p", "rb"))
+
         vectorizer = pickle.load(open("/root/vectorizer.p", "rb"))
 
         cleaned_tweets = self.process_raw_tweet(vectorizer,
@@ -211,13 +215,20 @@ if __name__ == '__main__':
     # 4 - person who tweeted
     # 5 - Actual tweet
 
-    # path = "/Users/zachzhang/DeepLearningTutorials/KaggleWarmUp/data/"
-    # n = 1000
+
+    path = '/root/sentiment_data/'
+
+    n = 1000
+
     # k = 2000
-    # extract_features(path,n)
-    # [model,vectorizer] = sentiment_analysis(path,n,k)
-    # test_model(path,n,model.predict,vectorizer)
+
+    sa = SentimentAnalysis()
+
+    #sa.extract_features(path,n)
+    #[model,vectorizer] = sentiment_analysis(path,n,k)
+    #test_model(path,n,model.predict,vectorizer)
     show = 'American Horror Story'
     limit = 1000
-    sa = SentimentAnalysis()
-    sa.readFromMongo(show, limit)
+
+    #sa = SentimentAnalysis()
+    print(sa.readFromMongo(show, limit))
