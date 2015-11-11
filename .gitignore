@@ -5,10 +5,11 @@
 
 # IntelliJ
 *.iml
-/.idea
+**/**/.idea
 
 # Maven
 /target
+**/**/target
 
 keys.cfg
 
