@@ -55,7 +55,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <configuration>
-                    <mainClass>com.ai.project.TwitterSearchPoll</mainClass>
+                    <mainClass>com.ai.project.TwitterStreamingFeed</mainClass>
                 </configuration>
             </plugin>
         </plugins>
