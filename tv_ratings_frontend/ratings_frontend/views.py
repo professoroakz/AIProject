@@ -21,18 +21,21 @@ def search(request):
         show = parse_show(str(query_string))
         if show != 'undetermined':
             print('Searching for: ', str(show))
-            sentiment = sentiment_analysis.readFromMongo(show, 500)
-            context = {'show': show,
-                       'prop_pos': sentiment[0],
-                       'prop_neg': sentiment[1],
-                       'num_tweets': sentiment[2]}
-            print('Sentiment ', sentiment)
-            print('context: ' + str(context))
+            try:
+                sentiment = sentiment_analysis.readFromMongo(show, 500)
+                context = {'show': show,
+                           'prop_pos': sentiment[0],
+                           'prop_neg': sentiment[1],
+                           'num_tweets': sentiment[2]}
+            except ValueError:
+                context = {'show': 'unable to match'}
         else:
-            context = {'show': 'unable to match ' + query_string ' to a show',
+            context = {'show': 'unable to match ' + query_string + ' to a show',
                        'prop_pos': 'N/A',
                        'prop_neg': 'N/A',
                        'num_tweets': 'N/A'}
+    else:
+        context = {'show': 'unable to match'}
 
     return render(request, 'ratings_frontend/search.html', context)
 
