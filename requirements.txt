@@ -1,0 +1,9 @@
+django
+numpy
+pandas
+matplotlib
+nltk
+sklearn
+pymongo
+imdb
+theano
