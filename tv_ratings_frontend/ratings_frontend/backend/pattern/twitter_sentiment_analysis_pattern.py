@@ -1,5 +1,5 @@
-# from pattern.vector import Document, NB
-# from pattern.db import csv
+from pattern.vector import Document, NB
+from pattern.db import csv
 
 # nb = NB()
 # for review, rating in csv('reviews.csv'):
@@ -38,6 +38,32 @@ def getTitle(show_title):
 def searchShow(tvshow):
     title_id = getTitle(tvshow)
     print('title: ', title_id)
-    print(imdb.get_title_reviews(title_id, max_results=15))
+    reviews = imdb.get_title_reviews(title_id, max_results=100)
+    # print(reviews[0].text)
+    return reviews
 
-searchShow("The Walking Dead")
+
+def naive_bayes_train(reviews):
+    nb = NB()
+
+    for review in reviews:
+        if review.rating is not None:
+            v = Document(review.text, type=int(review.rating), stopwords=True)
+            nb.train(v)
+
+            if review.rating <= 2:
+                print(nb.classify(Document('A terrible show!')))
+            elif review.rating <= 4:
+                print(nb.classify(Document('Rather disappointing.')))
+            elif review.rating <= 6:
+                print(nb.classify(Document('About average.')))
+            elif review.rating <= 8:
+                print(nb.classify(Document('A good show!')))
+            else:
+                print(nb.classify(Document('Amazing show!')))
+
+        print nb.classes
+
+
+reviews = searchShow("The Walking Dead")
+naive_bayes_train(reviews)
