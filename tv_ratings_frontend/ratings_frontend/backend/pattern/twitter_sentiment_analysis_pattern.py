@@ -1,15 +1,9 @@
 from pattern.vector import Document, NB
 from pattern.db import csv
-import sys
-# nb = NB()
-# for review, rating in csv('reviews.csv'):
-#     v = Document(review, type=int(rating), stopwords=True)
-#     nb.train(v)
-
-# print nb.classes
-# print nb.classify(Document('A good movie!'))
-
 from imdbpie import Imdb
+from pymongo import MongoClient
+import sys
+
 
 imdb = Imdb()
 imdb = Imdb(anonymize=True)  # to proxy requests
@@ -54,7 +48,49 @@ def naive_bayes_train(reviews):
             nb.train(v)
     print nb.classes
 
+def nb_test_imdb(reviews):
+    list = []
+    for review in reviews:
+        if review.rating is not None:
+            v = Document(review.text, type=int(review.rating), stopwords=True)
+            list.append(v)
+    print nb.test(list, target=None)
+
+def nb_test_tweets(tweets):
+    list = [Document(tweet, stopwords=True) for tweet in tweets]
+    print nb.test(list, target=None)
+
+
+
+def readFromMongo(show, limit):
+    # Connect to mongo
+    client = MongoClient()
+
+    # access movie stream db
+    movies = client['movieratings_stream']
+
+    # colletion of tweets
+    tweets = movies['tweets']
+
+    tweet_text = []
+    counter = 0
+
+    # iterate through cursor that takes the 'limit' most recent tweets with hashtag 'show'
+    for tweet in tweets.find({'show_title': show}):  # .sort('created_at', pymongo.DESCENDING):
+        if counter < limit:
+            tweet_text.append(tweet)
+            counter += 1
+        else:
+            break
+    return tweet_text
+
+
 
 reviews = searchShow("The Walking Dead")
 naive_bayes_train(reviews)
-print nb.classify(Document('glenn died i fucking hate this!'))
+
+bbtReviews = searchShow("The Big Bang Theory")
+
+nb_test_imdb(bbtReviews)
+
+nb_test_tweets(readFromMongo("The Walking Dead", 500))
