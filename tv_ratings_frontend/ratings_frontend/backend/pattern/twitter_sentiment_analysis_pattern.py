@@ -57,16 +57,15 @@ def nb_test_imdb(reviews):
     print nb.test(list, target=None)
 
 def nb_test_tweets(tweets):
-    tweet_docs = [(nb.classify(Document(tweet)), tweet) for tweet in tweets]
-    for tweet in tweet_docs:
-        print tweet
-    print("Doc[0] ", tweet_docs[0])
-    print("num documents: ", len(tweet_docs))
+    list = [Document(tweet, stopwords=True) for tweet in tweets]
+    print nb.test(list, target=None)
+
 
 
 def readFromMongo(show, limit):
+    # endpoint: 107.170.228.84, 223947lts488
     # Connect to mongo
-    client = MongoClient()
+    client = MongoClient('107.170.228.84:81', '223947lts488')
 
     # access movie stream db
     movies = client['movieratings_stream']
@@ -80,7 +79,7 @@ def readFromMongo(show, limit):
     # iterate through cursor that takes the 'limit' most recent tweets with hashtag 'show'
     for tweet in tweets.find({'show_title': show}):  # .sort('created_at', pymongo.DESCENDING):
         if counter < limit:
-            tweet_text.append(tweet.get("tweet_text"))
+            tweet_text.append(tweet)
             counter += 1
         else:
             break
@@ -93,6 +92,6 @@ naive_bayes_train(reviews)
 
 bbtReviews = searchShow("The Big Bang Theory")
 
-#nb_test_imdb(bbtReviews)
+nb_test_imdb(bbtReviews)
 
-nb_test_tweets(readFromMongo("Walking Dead", 500))
+nb_test_tweets(readFromMongo("The Walking Dead", 500))
