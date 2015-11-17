@@ -1,66 +1,10 @@
+from imdb import ImdbClient
 from pattern.vector import Document, NB
 from pattern.db import csv
 from imdbpie import Imdb
 from pymongo import MongoClient
 import sys
 
-
-# Creating an instance with caching enabled
-# Note that the cached responses expire every 2 hours or so.
-# The API response itself dictates the expiry time)
-# imdb = Imdb(cache=True)
-# Specify optional cache directory, the default is '/tmp/imdbpiecache'
-# imdb = Imdb(cache=True, cache_dir='/tmp/imdbpiecache/')
-class ImdbClient:
-    def __init__(self):
-        self.imdb = Imdb()
-        self.imdb = Imdb(anonymize=True)  # to proxy requests
-
-    def readFromMongo(self, show, limit):
-        # Connect to mongo
-        client = MongoClient()
-
-        # access movie stream db
-        movies = client['movieratings_stream']
-
-        # colletion of tweets
-        tweets = movies['tweets']
-
-        tweet_text = []
-        counter = 0
-
-        # iterate through cursor that takes the 'limit' most recent tweets with hashtag 'show'
-        for tweet in tweets.find({'show_title': show}):  # .sort('created_at', pymongo.DESCENDING):
-            if counter < limit:
-                tweet_text.append(tweet.get("tweet_text"))
-                counter += 1
-            else:
-                break
-        return tweet_text
-
-    def getTitle(self, show_title):
-        title_list = list(self.imdb.search_for_title(show_title))
-        index = 0
-        show_id = None
-
-        while show_id is None:
-            if title_list[index][u'title'] == show_title:
-                show_id = title_list[index][u'imdb_id']
-            index += 1
-
-        return show_id
-
-    def searchShow(self, tvshow):
-        title_id = self.getTitle(tvshow)
-        print('title: ', title_id)
-        reviews = self.imdb.get_title_reviews(title_id, max_results=sys.maxint)
-        print len(reviews)
-        return reviews
-
-    def getCurrentImdbRating(self, tvshow):
-        tvshowid = self.getTitle(tvshow)
-        title = self.imdb.get_title_by_id(tvshowid)
-        return float(title.rating)
 
 class NBModel:
     def __init__(self):
@@ -100,27 +44,30 @@ class NBModel:
         print("TV SHOW:::::::::::" + tvshow)
         Statistics().printStats(tvshow, ratingSum, len(tweet_docs))
 
+
 class Statistics:
     def __init__(self):
         self.imdb = ImdbClient()
+
     def printStats(self, tvshow, sum, numItems):
         print("---------- Statistics -----------")
         print("Sum of the ratings from Twitter: ", sum)
         print("Number of classified ratings: ", numItems)
-        print("Average value: ", float(sum)/numItems)
+        print("Average value: ", float(sum) / numItems)
         print("Current IMDB rating: ", self.imdb.getCurrentImdbRating(tvshow))
+
 
 def parse_show(show):
     lower_show = show.lower()
     print('Show: ', show)
     possible_shows = ['Walking Dead', \
-            'Arrow',\
-            'Family Guy',\
-            'Big bang Theory',\
-            'South Park',\
-            'American Horror Story',\
-            'Modern Family',\
-            'Heroes Reborn']
+                      'Arrow', \
+                      'Family Guy', \
+                      'Big bang Theory', \
+                      'South Park', \
+                      'American Horror Story', \
+                      'Modern Family', \
+                      'Heroes Reborn']
     if 'walking' in lower_show or 'dead' in lower_show:
         return possible_shows[0]
     elif lower_show == 'arrow':
@@ -154,9 +101,11 @@ class Classifier:
 
         self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), 100))
 
+
 def main(tvshow):
     classifier = Classifier(tvshow)
     classifier.nbClassify()
+
 
 if __name__ == "__main__":
     main("The Walking Dead")
