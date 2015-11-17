@@ -63,12 +63,19 @@ class NBModel:
     def __init__(self):
         self.nb = NB()
         self.stats = Statistics()
+        try:
+            self.nb = self.nb.load("./nb_training.p")
+            self.new_nb_model = True
+        except IOError:
+            self.new_nb_model = False
+            print("Creating new NB model")
 
     def naive_bayes_train(self, reviews):
         for review in reviews:
             if review.rating is not None:
                 v = Document(review.text, type=int(review.rating), stopwords=True)
                 self.nb.train(v)
+        self.nb.save("./nb_training.p")
         print self.nb.classes
 
     def nb_test_imdb(self, reviews):
@@ -100,14 +107,18 @@ class Statistics:
 def main():
     client = ImdbClient()
     nb = NBModel()
-    reviews = client.searchShow("The Walking Dead")
-    nb.naive_bayes_train(reviews)
+
+    if nb.new_nb_model:
+        reviews = client.searchShow("The Walking Dead")
+        nb.naive_bayes_train(reviews)
 
     bbtReviews = client.searchShow("The Big Bang Theory")
 
     # nb_test_imdb(bbtReviews)
 
-    nb.nb_classify_tweets(client.readFromMongo("Walking Dead", sys.maxint))
+    nb.nb_classify_tweets(client.readFromMongo("Walking Dead", 5000))
+    nb.nb_classify_tweets(client.readFromMongo("Big bang Theory", 5000))
+
 
 if __name__ == "__main__":
     main()
