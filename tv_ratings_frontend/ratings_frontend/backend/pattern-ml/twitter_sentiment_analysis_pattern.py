@@ -5,17 +5,12 @@ from imdbpie import Imdb
 from pymongo import MongoClient
 import sys
 
-
-class SVMModel:
-    def __init__(self):
-        self.svm = SVM()
-
 class NBModel:
     def __init__(self):
         self.nb = NB()
         self.stats = Statistics()
         try:
-            self.nb = self.nb.load("./nb_training.p")
+   #         self.nb = self.nb.load("./nb_training.p")
             self.new_nb_model = True
         except IOError:
             self.new_nb_model = False
@@ -26,8 +21,8 @@ class NBModel:
             if review.rating is not None and review.rating < 10 and review.rating > 1:
                 v = Document(review.text, type=int(review.rating), stopwords=True)
                 self.nb.train(v)
-        self.nb.save("./nb_training.p")
-        print self.nb.classes
+        #self.nb.save("./nb_training.p")
+     #   print self.nb.classes
 
     def nb_test_imdb(self, reviews):
         arr = []
@@ -42,14 +37,18 @@ class NBModel:
         tweet_docs = [(self.nb.classify(Document(tweet)), tweet) for tweet in tweets]
         for tweet in tweet_docs:
             ratingSum += tweet[0]
-        #    print tweet
-        # print("Doc[0] ", tweet_docs[0])
-        print("num documents: ", len(tweet_docs))
-        print("TV SHOW:::::::::::" + tvshow)
+        self.nb_stats()
         Statistics().printStats(tvshow, ratingSum, len(tweet_docs))
         print self.nb.distribution
-  #      print self.nb.confusion_matrix()
-   #     print self.nb.confusion_matrix(data[500:])(True) # (TP, TN, FP, FN)
+
+    def nb_stats(self):
+        print('----------- Classifier stats -----------')
+      #  print("Features: ", self.nb.features)
+        print("Classes: ", self.nb.classes)
+        print("Skewness: ", self.nb.skewness)
+        print("Distribution: ", self.nb.distribution)
+        print("Majority: ", self.nb.majority)
+        print("Minority: ", self.nb.minority)
 
 
 class Statistics:
@@ -104,6 +103,22 @@ class Classifier:
         self.nb = NBModel()
         self.client = ImdbClient()
 
+    def classifyAll(self):
+        possible_shows = ['Walking Dead', \
+                      'Arrow', \
+                      'Family Guy', \
+                      'Big bang Theory', \
+                      'South Park', \
+                      'American Horror Story', \
+                      'Modern Family', \
+                      'Heroes Reborn']
+
+        reviews = []
+        for show in possible_shows:
+            reviews.append(self.client.searchShow(show))
+        self.nb.naive_bayes_train(reviews)
+        self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
+
     def nbClassify(self):
         reviews = self.client.searchShow(self.tvshow)
 
@@ -111,11 +126,9 @@ class Classifier:
 
         self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
 
-
 def main(tvshow):
     classifier = Classifier(tvshow)
     classifier.nbClassify()
-
 
 if __name__ == "__main__":
     main("The Walking Dead")

@@ -50,11 +50,11 @@ class ImdbClient:
 
     def searchShow(self, tvshow):
         title_id = self.getTitle(tvshow)
-        print('title: ', title_id)
+       # print('title: ', title_id)
         reviews = self.imdb.get_title_reviews(title_id, max_results=sys.maxint)
         title = self.imdb.get_title_by_id(title_id)
-        print("title: " + str(title.data))
-        print len(reviews)
+       # print("title: " + str(title.data))
+       # print len(reviews)
         return reviews
 
     def getCurrentImdbRating(self, tvshow):
