@@ -3,8 +3,9 @@
   <br>
   <div class="container">
     <p>Searched for show: {{ show }}</p>
-    <p>Proportion of tweets rated as positive: {{ prop_pos }}</p>
-    <p>Proportion of tweets rated as negative: {{ prop_neg }}</p>
     <p>Total tweets analyzed: {{ num_tweets }}</p>
+    <p>Our estimated rating: {{ estimated_rating }}</p>
+    <p>Actual IMDB rating: {{ imdb_rating }}</p>
+    <p>Percent error: {{ percent_error }}</p>
   </div>
 {% endblock %}

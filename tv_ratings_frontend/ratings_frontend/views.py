@@ -2,6 +2,8 @@ from django.shortcuts import render
 import re
 
 from ratings_frontend.SentimentAnalysis import twitter_sentiment_analysis
+from ratings_frontend.backend.pattern_ml import imdb
+from ratings_frontend.backend.pattern_ml import twitter_sentiment_analysis_pattern as tsa
 
 # Create your views here.
 
@@ -22,11 +24,21 @@ def search(request):
         if show != 'undetermined':
             print('Searching for: ', str(show))
             try:
-                sentiment = sentiment_analysis.readFromMongo(show, 500)
+                # sentiment = sentiment_analysis.readFromMongo(show, 500)
+                client = imdb.ImdbClient()
+                imdb_classifier = tsa.Classifier(query_string)
+                stats = imdb_classifier.nbClassify()
+
+                print("stats:\n" + str(stats))
+
                 context = {'show': show,
-                           'prop_pos': sentiment[0],
-                           'prop_neg': sentiment[1],
-                           'num_tweets': sentiment[2]}
+                           'num_tweets': stats[1],
+                           'estimated_rating': stats[2],
+                           'imdb_rating': stats[3],
+                           'percent_error': stats[4]}
+                           # 'prop_pos': sentiment[0],
+                           # 'prop_neg': sentiment[1],
+                           # 'num_tweets': sentiment[2]}
             except ValueError:
                 context = {'show': 'unable to match'}
         else:
