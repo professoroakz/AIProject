@@ -38,7 +38,7 @@ class NBModel:
         tweet_docs = [(self.nb.classify(Document(tweet)), tweet) for tweet in tweets]
         for tweet in tweet_docs:
             ratingSum += tweet[0]
-            print tweet
+            # print tweet
         # print("Doc[0] ", tweet_docs[0])
         print("num documents: ", len(tweet_docs))
         print("TV SHOW:::::::::::" + tvshow)

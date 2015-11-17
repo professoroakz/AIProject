@@ -11,7 +11,7 @@ import sys
 # imdb = Imdb(cache=True, cache_dir='/tmp/imdbpiecache/')
 class ImdbClient:
     def __init__(self):
-        self.imdb = Imdb()
+        self.imdb = Imdb(exclude_episodes=False)
         self.imdb = Imdb(anonymize=True)  # to proxy requests
 
     def readFromMongo(self, show, limit):
@@ -52,6 +52,8 @@ class ImdbClient:
         title_id = self.getTitle(tvshow)
         print('title: ', title_id)
         reviews = self.imdb.get_title_reviews(title_id, max_results=sys.maxint)
+        title = self.imdb.get_title_by_id(title_id)
+        print("title: " + str(title.data))
         print len(reviews)
         return reviews
 
@@ -59,3 +61,15 @@ class ImdbClient:
         tvshowid = self.getTitle(tvshow)
         title = self.imdb.get_title_by_id(tvshowid)
         return float(title.rating)
+
+    def _get_episode(self, tvshow, episode_title):
+        pass
+
+    # get list of all episodes
+
+    def get_all_episodes(self, tvshow):
+        pass
+
+# get list of all episode names given a tv show
+# create review list, for each episode name, call searchshow append
+# call method that trains
