@@ -62,6 +62,7 @@ class ImdbClient:
 class NBModel:
     def __init__(self):
         self.nb = NB()
+        self.stats = Statistics()
 
     def naive_bayes_train(self, reviews):
         for review in reviews:
@@ -79,11 +80,21 @@ class NBModel:
         print self.nb.test(arr, target=None)
 
     def nb_classify_tweets(self, tweets):
+        ratingSum = 0
         tweet_docs = [(self.nb.classify(Document(tweet)), tweet) for tweet in tweets]
         for tweet in tweet_docs:
+            ratingSum += tweet[0]
             print tweet
         # print("Doc[0] ", tweet_docs[0])
         print("num documents: ", len(tweet_docs))
+        self.stats.printStats(ratingSum, len(tweet_docs))
+
+class Statistics:
+    def printStats(self, sum, numItems):
+        print("---------- Statistics -----------")
+        print("Sum of the ratings from Twitter: ", sum)
+        print("Number of classified ratings: ", numItems)
+        print("Average value: ", float(sum)/numItems)
 
 
 def main():
@@ -96,7 +107,7 @@ def main():
 
     # nb_test_imdb(bbtReviews)
 
-    nb.nb_classify_tweets(client.readFromMongo("Walking Dead", 500))
+    nb.nb_classify_tweets(client.readFromMongo("Walking Dead", sys.maxint))
 
 if __name__ == "__main__":
     main()
