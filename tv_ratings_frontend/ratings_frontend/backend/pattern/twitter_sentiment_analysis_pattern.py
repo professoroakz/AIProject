@@ -4,7 +4,6 @@ from imdbpie import Imdb
 from pymongo import MongoClient
 import sys
 
-
 imdb = Imdb()
 imdb = Imdb(anonymize=True)  # to proxy requests
 
@@ -17,6 +16,7 @@ imdb = Imdb(anonymize=True)  # to proxy requests
 # imdb = Imdb(cache=True, cache_dir='/tmp/imdbpiecache/')
 
 nb = NB()
+
 
 def getTitle(show_title):
     title_list = list(imdb.search_for_title(show_title))
@@ -41,12 +41,12 @@ def searchShow(tvshow):
 
 
 def naive_bayes_train(reviews):
-
     for review in reviews:
         if review.rating is not None:
             v = Document(review.text, type=int(review.rating), stopwords=True)
             nb.train(v)
     print nb.classes
+
 
 def nb_test_imdb(reviews):
     list = []
@@ -56,16 +56,18 @@ def nb_test_imdb(reviews):
             list.append(v)
     print nb.test(list, target=None)
 
-def nb_test_tweets(tweets):
-    list = [Document(tweet, stopwords=True) for tweet in tweets]
-    print nb.test(list, target=None)
 
+def nb_classify_tweets(tweets):
+    tweet_docs = [(nb.classify(Document(tweet)), tweet) for tweet in tweets]
+    for tweet in tweet_docs:
+        print tweet
+    # print("Doc[0] ", tweet_docs[0])
+    print("num documents: ", len(tweet_docs))
 
 
 def readFromMongo(show, limit):
-    # endpoint: 107.170.228.84, 223947lts488
     # Connect to mongo
-    client = MongoClient('107.170.228.84:81', '223947lts488')
+    client = MongoClient()
 
     # access movie stream db
     movies = client['movieratings_stream']
@@ -79,12 +81,11 @@ def readFromMongo(show, limit):
     # iterate through cursor that takes the 'limit' most recent tweets with hashtag 'show'
     for tweet in tweets.find({'show_title': show}):  # .sort('created_at', pymongo.DESCENDING):
         if counter < limit:
-            tweet_text.append(tweet)
+            tweet_text.append(tweet.get("tweet_text"))
             counter += 1
         else:
             break
     return tweet_text
-
 
 
 reviews = searchShow("The Walking Dead")
@@ -92,6 +93,6 @@ naive_bayes_train(reviews)
 
 bbtReviews = searchShow("The Big Bang Theory")
 
-nb_test_imdb(bbtReviews)
+# nb_test_imdb(bbtReviews)
 
-nb_test_tweets(readFromMongo("The Walking Dead", 500))
+nb_classify_tweets(readFromMongo("Walking Dead", 500))
