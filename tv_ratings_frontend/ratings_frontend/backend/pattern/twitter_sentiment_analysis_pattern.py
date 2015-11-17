@@ -62,12 +62,16 @@ class ImdbClient:
         title = self.imdb.get_title_by_id(tvshowid)
         return float(title.rating)
 
+class SVMModel:
+    def __init__(self):
+        self.svm = SVM()
+
 class NBModel:
     def __init__(self):
         self.nb = NB()
         self.stats = Statistics()
         try:
-            self.nb = self.nb.load("./nb_training.p")
+   #         self.nb = self.nb.load("./nb_training.p")
             self.new_nb_model = True
         except IOError:
             self.new_nb_model = False
@@ -75,7 +79,7 @@ class NBModel:
 
     def naive_bayes_train(self, reviews):
         for review in reviews:
-            if review.rating is not None:
+            if review.rating is not None and review.rating < 10 and review.rating > 1:
                 v = Document(review.text, type=int(review.rating), stopwords=True)
                 self.nb.train(v)
         self.nb.save("./nb_training.p")
@@ -94,21 +98,27 @@ class NBModel:
         tweet_docs = [(self.nb.classify(Document(tweet)), tweet) for tweet in tweets]
         for tweet in tweet_docs:
             ratingSum += tweet[0]
-            print tweet
+        #    print tweet
         # print("Doc[0] ", tweet_docs[0])
         print("num documents: ", len(tweet_docs))
         print("TV SHOW:::::::::::" + tvshow)
         Statistics().printStats(tvshow, ratingSum, len(tweet_docs))
+        print self.nb.distribution
+  #      print self.nb.confusion_matrix()
+   #     print self.nb.confusion_matrix(data[500:])(True) # (TP, TN, FP, FN)
 
 class Statistics:
     def __init__(self):
         self.imdb = ImdbClient()
     def printStats(self, tvshow, sum, numItems):
+        currentImdbRating = self.imdb.getCurrentImdbRating(tvshow)
+        predictedValue = float(sum)/numItems
         print("---------- Statistics -----------")
         print("Sum of the ratings from Twitter: ", sum)
         print("Number of classified ratings: ", numItems)
-        print("Average value: ", float(sum)/numItems)
-        print("Current IMDB rating: ", self.imdb.getCurrentImdbRating(tvshow))
+        print("Average value: ", predictedValue)
+        print("Current IMDB rating: ", currentImdbRating)
+        print("Current error: ", float(currentImdbRating - predictedValue) / float(currentImdbRating))
 
 def parse_show(show):
     lower_show = show.lower()
@@ -152,7 +162,7 @@ class Classifier:
 
         self.nb.naive_bayes_train(reviews)
 
-        self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), 100))
+        self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
 
 def main(tvshow):
     classifier = Classifier(tvshow)
