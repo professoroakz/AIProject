@@ -15,6 +15,7 @@ import pickle
 import pymongo
 from pymongo import MongoClient
 
+pairs = {'(luv)|(<3)': 'love', 'h8': 'hate'}
 
 class SentimentAnalysis():
     # model needs to be a model from sklearn or obj with function that can predict
@@ -85,10 +86,15 @@ class SentimentAnalysis():
         no_url = re.sub("http[s]??://.+?\\..+?[ ]?", "", raw_review)
 
         # Remove numerics
-        letters_only = re.sub("[^a-zA-Z]", " ", no_url)
+        remove_numerics = re.sub(" [0-9]+? ", " ", re.sub(" [^a-zA-z0-9]+? ", " ", no_url))
 
         # to lowercase
-        words = letters_only.lower().split()
+        temp = letters_only.lower()
+
+        for regex, repl in pairs:
+            temp = re.sub(regex, repl, temp)
+
+        word = temp
 
         # remove stop words - the, of , a ....
         stops = set(stopwords.words("english"))
