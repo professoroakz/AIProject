@@ -7,6 +7,12 @@ import sys
 import os
 
 
+# TODO:
+# 1 Train model with ALL imdb data possible for all shows and classify tweets from one show based on this (predicting overall imdb score?)
+# 2 Train model with specific show + episode specific data and classify tweets for one show, try to predict next episode's imdb score (all tweets)!
+# 3 Train model with specific show + episode specific data in order to classify tweets from one week back
+
+
 class NBModel:
     def __init__(self):
         self.nb = NB()
@@ -168,7 +174,6 @@ class Classifier:
     def nbClassify(self):
         return self.nb.nb_classify_tweets(self.tvshow,
                                           self.client.readFromMongo(parse_show(self.tvshow), 10000))
-
 
 def main(tvshow):
     classifier = Classifier(tvshow)
