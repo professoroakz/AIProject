@@ -5,13 +5,16 @@ from imdbpie import Imdb
 from pymongo import MongoClient
 import sys
 import os
+from numpy import *
+import re
+import nltk
+from nltk.corpus import stopwords
 
 
 # TODO:
 # 1 Train model with ALL imdb data possible for all shows and classify tweets from one show based on this (predicting overall imdb score?)
 # 2 Train model with specific show + episode specific data and classify tweets for one show, try to predict next episode's imdb score (all tweets)!
 # 3 Train model with specific show + episode specific data in order to classify tweets from one week back
-
 
 class NBModel:
     def __init__(self):
@@ -33,10 +36,10 @@ class NBModel:
 
     def nb_train_text(self, reviews):
         for review in reviews:
-            if review.rating is not None and review.rating < 10 and review.rating > 1:
+            if review.rating is not None:# and review.rating < 10 and review.rating > 1:
                 v = Document(review.text, type=int(review.rating), stopwords=True)
                 self.nb.train(v)
-                # self.nb.save("./nb_training.p")
+                self.nb.save("./nb_training.p")
                 #   print self.nb.classes
 
     def nb_train_summary(self, reviews):
@@ -51,21 +54,24 @@ class NBModel:
         self.nb.save_model()
 
     def save_model(self):
+    #    print ""
         self.nb.save('./nb_training.p')
 
     def nb_test_imdb(self, reviews):
         arr = []
         for review in reviews:
             if review.rating is not None:
-                v = Document(review.text, type=int(review.rating), stopwords=True)
+                v = Document(self.review_to_words(review.text), type=int(review.rating), stopwords=True)
                 arr.append(v)
         print self.nb.test(arr, target=None)
 
     def nb_classify_tweets(self, tvshow, tweets):
         ratingSum = 0
-        tweet_docs = [(self.nb.classify(Document(tweet)), tweet) for tweet in tweets]
+        tweet_docs = [(self.nb.classify(Document(self.review_to_words(tweet))), self.review_to_words(tweet)) for tweet in tweets]
         for tweet in tweet_docs:
             ratingSum += tweet[0]
+            #print tweet
+           # print tweet
         self.nb_stats()
         Statistics().printStats(tvshow, ratingSum, len(tweet_docs))
         print self.nb.distribution
@@ -81,6 +87,21 @@ class NBModel:
         print("Majority: ", self.nb.majority)
         print("Minority: ", self.nb.minority)
 
+    def review_to_words(self, raw_review):
+        no_url = re.sub("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", "", raw_review)
+
+        # Remove numerics
+        letters_only = re.sub("[^a-zA-Z]", " ", no_url)
+
+        # to lowercase
+        words = letters_only.lower().split()
+
+        # remove stop words - the, of , a ....
+        stops = set(stopwords.words("english"))
+
+        meaningful_words = [w for w in words if not w in stops]
+
+        return (" ".join(meaningful_words))
 
 class Statistics:
     def __init__(self):
@@ -158,28 +179,21 @@ class Classifier:
         self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
 
     def nb_train(self):
-        shows = ['The Walking Dead',
-                 'The Big Bang Theory',
-                 'Arrow',
-                 'Family Guy',
-                 'South Park',
-                 'American Horror Story',
-                 'Modern Family',
-                 'Heroes Reborn']
-        for show in shows:
-            reviews = self.client.searchShow(show)
+            reviews = self.client.searchShow(self.tvshow)
             self.nb.nb_train_text(reviews)
             self.nb.save_model()
 
     def nbClassify(self):
         return self.nb.nb_classify_tweets(self.tvshow,
-                                          self.client.readFromMongo(parse_show(self.tvshow), 10000))
+                                          self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
 
 def main(tvshow):
     classifier = Classifier(tvshow)
-    classifier.nb_train()
-    classifier.nbClassify()
-
+    res = classifier.client.get_specific_episode_names(tvshow, 6)
+  #  res = classifier.client.get_all_episode_names(tvshow)
+    print res
+    #classifier.nb_train()
+    #classifier.nbClassify()
 
 if __name__ == "__main__":
     main("The Walking Dead")

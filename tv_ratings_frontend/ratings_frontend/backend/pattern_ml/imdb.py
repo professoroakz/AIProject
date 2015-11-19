@@ -1,5 +1,6 @@
 from imdbpie import Imdb
 from pymongo import MongoClient
+from pytvdbapi import api
 import sys
 
 
@@ -13,6 +14,7 @@ class ImdbClient:
     def __init__(self):
         self.imdb = Imdb(exclude_episodes=False)
         self.imdb = Imdb(anonymize=True)  # to proxy requests
+        self.db = api.TVDB('B43FF87DE395DF56')
 
     def readFromMongo(self, show, limit):
         # Connect to mongo
@@ -62,13 +64,35 @@ class ImdbClient:
         title = self.imdb.get_title_by_id(tvshowid)
         return float(title.rating)
 
-    def _get_episode(self, tvshow, episode_title):
-        pass
+    def get_all_episode_names(self, tvshow):
+        result = self.db.search(tvshow, 'en')
+        show = result[0]
+        res = []
+        for x in range(1, len(show)):
+            season = show[x]
+            print season.season_number
+            for y in range(1, len(season) + 1):
+                if season[y].EpisodeName is not None:
+                    res.append(season[y].EpisodeName)
+        return res
 
-    # get list of all episodes
+    def get_specific_episode_names(self, tvshow, season):
+        result = self.db.search(tvshow, 'en')
+        show = result[0]
+        res = []
+        season = show[1]
+        for x in range(1, len(season) + 1):
+            if season[x].EpisodeName is not None:
+                print season[x].EpisodeName
+                res.append(season[x].EpisodeName)
+        return res
 
-    def get_all_episodes(self, tvshow):
-        pass
+    def get_all_episodes(self, episodelist, tvshow):
+        for episode in episodelist:
+            currEpisode = episode + " " + tvshow
+            reviews = []
+            reviews.append(searchshow(currEpisode))
+        #call searchshow for each
 
 # get list of all episode names given a tv show
 # create review list, for each episode name, call searchshow append
