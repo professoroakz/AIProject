@@ -1,7 +1,6 @@
-from imdb import ImdbClient
+from imdbbackend import ImdbClient
 from pattern.vector import Document, NB
 from pattern.db import csv
-from imdbpie import Imdb
 from pymongo import MongoClient
 import unicodedata
 import sys
