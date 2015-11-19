@@ -47,6 +47,7 @@ class ImdbClient:
             print ("show title", title_list[index][u'title'])
             print ("show title", show_title)
             if title_list[index][u'title'] in show_title:
+                print title_list
                 show_id = title_list[index][u'imdb_id']
                 # endless loop
                 index += 1
