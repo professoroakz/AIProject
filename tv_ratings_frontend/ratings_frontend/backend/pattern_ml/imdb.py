@@ -44,17 +44,25 @@ class ImdbClient:
         show_id = None
 
         while show_id is None:
-            if title_list[index][u'title'] == show_title:
+            print ("show title", title_list[index][u'title'])
+            print ("show title", show_title)
+            if title_list[index][u'title'] in show_title:
                 show_id = title_list[index][u'imdb_id']
-            index += 1
-
+                # endless loop
+                index += 1
         return show_id
 
     def searchShow(self, tvshow):
+        print tvshow
         title_id = self.getTitle(tvshow)
+#        if tvshow is not self.tvshow:
+        print title_id
+        print tvshow
        # print('title: ', title_id)
         reviews = self.imdb.get_title_reviews(title_id, max_results=sys.maxint)
         title = self.imdb.get_title_by_id(title_id)
+        print title_id
+        print tvshow
        # print("title: " + str(title.data))
        # print len(reviews)
         return reviews
@@ -70,7 +78,6 @@ class ImdbClient:
         res = []
         for x in range(1, len(show)):
             season = show[x]
-            print season.season_number
             for y in range(1, len(season) + 1):
                 if season[y].EpisodeName is not None:
                     res.append(season[y].EpisodeName)

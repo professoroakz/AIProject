@@ -3,6 +3,7 @@ from pattern.vector import Document, NB
 from pattern.db import csv
 from imdbpie import Imdb
 from pymongo import MongoClient
+import unicodedata
 import sys
 import os
 from numpy import *
@@ -183,17 +184,29 @@ class Classifier:
             self.nb.nb_train_text(reviews)
             self.nb.save_model()
 
+    def nb_train_all_episodes(self):
+        # General show specific reviews
+        reviews = self.client.searchShow(self.tvshow)
+        episodeNames = self.client.get_all_episode_names(self.tvshow)
+        for name in episodeNames:
+            episodeShow = name + " " + self.tvshow #(self.tvshow).join(unicodedata.normalize('NFKD', name).encode('ascii', 'ignore'))
+            query = self.client.searchShow(episodeShow)
+            episodeShow = ''
+            if query is not None:
+                reviews.append(query)
+        self.nb.nb_train_text(reviews)
+
+
     def nbClassify(self):
         return self.nb.nb_classify_tweets(self.tvshow,
                                           self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
 
 def main(tvshow):
     classifier = Classifier(tvshow)
-    res = classifier.client.get_specific_episode_names(tvshow, 6)
+  #  res = classifier.client.get_specific_episode_names(tvshow, 6)
   #  res = classifier.client.get_all_episode_names(tvshow)
-    print res
-    #classifier.nb_train()
-    #classifier.nbClassify()
+    classifier.nb_train_all_episodes()
+    classifier.nbClassify()
 
 if __name__ == "__main__":
     main("The Walking Dead")
