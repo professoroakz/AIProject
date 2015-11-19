@@ -11,7 +11,6 @@ import re
 import nltk
 from nltk.corpus import stopwords
 
-
 # TODO:
 # 1 Train model with ALL imdb data possible for all shows and classify tweets from one show based on this (predicting overall imdb score?)
 # 2 Train model with specific show + episode specific data and classify tweets for one show, try to predict next episode's imdb score (all tweets)!

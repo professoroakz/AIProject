@@ -1,7 +1,13 @@
+from imdb import IMDb
 from imdbpie import Imdb
 from pymongo import MongoClient
 from pytvdbapi import api
+from time import sleep
+import os
 import sys
+
+# get episode links with imdbPy
+# get reviews with imdbpie
 
 
 # Creating an instance with caching enabled
@@ -12,6 +18,7 @@ import sys
 # imdb = Imdb(cache=True, cache_dir='/tmp/imdbpiecache/')
 class ImdbClient:
     def __init__(self):
+        self.imdbpy = IMDb()
         self.imdb = Imdb(exclude_episodes=False)
         self.imdb = Imdb(anonymize=True)  # to proxy requests
         self.db = api.TVDB('B43FF87DE395DF56')
@@ -39,19 +46,60 @@ class ImdbClient:
         return tweet_text
 
     def getTitle(self, show_title):
-        title_list = list(self.imdb.search_for_title(show_title))
-        index = 0
-        show_id = None
+        m = self.imdbpy.get_movie('0389564')  # The 4400.
+        m['kind']    # kind is 'tv series'.
+        self.imdbpy.update(m, 'episodes')   # retrieves episodes information.
 
-        while show_id is None:
-            print ("show title", title_list[index][u'title'])
-            print ("show title", show_title)
-            if title_list[index][u'title'] in show_title:
-                print title_list
-                show_id = title_list[index][u'imdb_id']
-                # endless loop
-                index += 1
-        return show_id
+        m['episodes']    # a dictionary with the format:
+                       #    {#season_number: {
+                       #                      #episode_number: Movie object,
+                       #                      #episode_number: Movie object,
+                       #                      ...
+                       #                     },
+                       #     ...
+                       #    }
+                       # season_number always starts with 1, episode_number
+                       # depends on the series' numbering schema: some series
+                       # have a 'episode 0', while others starts counting from 1.
+
+        m['episodes'][1][1] # <Movie id:0502803[http] title:_"The 4400" Pilot (2004)_>
+
+        e = m['episodes'][1][2]  # second episode of the first season.
+        e['kind']    # kind is 'episode'.
+        e['season'], e['episode']   # return 1, 2.
+        e['episode of']  # <Movie id:0389564[http] title:_"4400, The" (2004)_>
+                       # XXX: beware that e['episode of'] and m _are not_ the
+                       #      same object, while both represents the same series.
+                       #      This is to avoid circular references; the
+                       #      e['episode of'] object only contains basics
+                       #      information (title, movieID, year, ....)
+        i.update(e)  # retrieve normal information about this episode (cast, ...)
+
+        e['title']  # 'The New and Improved Carl Morrissey'
+        e['series title']  # 'The 4400'
+        e['long imdb episode title']  # '"The 4400" The New and Improved Carl Morrissey (2004)'
+
+
+        # print(show_title)
+        # sleep(3)
+        # title_list = list(self.imdb.search_for_title(show_title))
+        # print(list(self.imdb.search_for_title("Days Gone Bye The Walking Dead")))
+        # print(title_list)
+        # sleep(3)
+        # index = 0
+        # show_id = None
+
+        # while show_id is None:
+        #     print ("title_list", title_list[index][u'title'])
+        #     print ("show title", show_title)
+        #     result = title_list[index][u'title'].lower()
+        #     query = show_title.lower()
+        #     if result in query:
+        #         print title_list
+        #         show_id = title_list[index][u'imdb_id']
+        #         # endless loop
+        #     index += 1
+        # return show_id
 
     def searchShow(self, tvshow):
         print tvshow
