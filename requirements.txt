@@ -8,4 +8,5 @@ pymongo
 imdbpie
 theano
 pattern
+pytvdbapi
 imdbpy
