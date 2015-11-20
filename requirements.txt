@@ -10,3 +10,4 @@ theano
 pattern
 pytvdbapi
 imdbpy
+fuzzywuzzy
