@@ -1,4 +1,5 @@
 from imdb import IMDb
+from imdb import utils as util
 from imdbpie import Imdb
 from pymongo import MongoClient
 from pytvdbapi import api
@@ -79,6 +80,14 @@ class ImdbClient:
 
         return reviews
 
+    def get_episode_reviews(self, episode_id):
+        reviews = []
+        reviews = self.imdb.get_title_reviews(episode_id, max_results=sys.maxint)
+        title = self.imdb.get_title_by_id(episode_id)
+        # print reviews
+
+        return reviews
+
     def getCurrentImdbRating(self, tvshow):
         tvshowid = self.get_show_id(tvshow)
         title = self.imdb.get_title_by_id(tvshowid)
@@ -96,6 +105,13 @@ class ImdbClient:
                 if season[y].EpisodeName is not None and season[y].EpisodeName != '':
                     res.append(season[y].EpisodeName)
         return res
+
+    def get_show(self, show_id):
+        show = self.imdbpy.get_movie(show_id.replace('t', ''))
+        self.imdbpy.update(show, 'episodes')
+        print("show_show(" + show_id + "): " + str(show))
+
+        return show
 
     # episode names for a specific season of tvshow
     def get_specific_episode_names(self, tvshow, season):
@@ -120,6 +136,50 @@ class ImdbClient:
         return reviews
 
 
+class MovieMongo:
+    def __init__(self):
+        self.mongo = MongoClient()
+
+    def save_show(self, show_title, episodes_data):
+        try:
+            print("show title: " + show_title)
+            print("episode data:\n" + str(episodes_data))
+            review_db = self.mongo['tv_show_reviews']
+            review_ids = self._save_reviews(episodes_data)
+            print(review_ids)
+            review_db['shows'].save({
+                'show_title': show_title,
+                'review_ids': review_ids
+            })
+        except RuntimeError:
+            print('Error saving episodes for ' + show_title)
+
+    def _save_reviews(self, reviews):
+        try:
+            review_indices = []
+            review_db = self.mongo['tv_show_reviews']
+            for review in reviews:
+                index = review_db['reviews'].count()
+                review_indices.append(index)
+                review_db['reviews'].save({
+                    'id': index,
+                    'review': review})
+        except RuntimeError:
+            print('Error saving reviews')
+
+        return review_indices
+
+    def get_show(self, show_title):
+        db = self.mongo['tv_show_reviews']
+        shows = db['shows']
+        show = shows.find({'show_title': show_title})
+        if show.count() == 0:
+            print('no show returned from mongo')
+            show = None
+        # print("db returned: " + str(show))
+        return show
+
+
 # get list of all episode names given a tv show
 # create review list, for each episode name, call searchshow append
 # call method that trains
@@ -127,63 +187,85 @@ class ImdbClient:
 # TODO create tv show class, save all ids for each episode
 
 class TVShow:
-    def __init__(self, show_title): # option for tvepisode boolean yes or no
+    def __init__(self, show_title):  # option for tvepisode boolean yes or no
         self.client = ImdbClient()
         self.title = show_title
-        self.show_id = None
+        self.show_id = self.client.get_show_id(show_title)
         self.episodes = None
 
     def _get_episodes(self):
         if self.episodes is None:
             self.episodes = list()
-            try:
-                self.episodes = self._get_episodes_mongo()
-            except RuntimeError:
-                # if reviews is None or len(reviews) == 0:
-                self.episodes = self.client.get_all_episode_names(self.title)
-                self._save_show(self.episodes, None)
-        return self.episodes
+            movie_mongo = MovieMongo()
+            show = movie_mongo.get_show(self.title)
 
-    # retrieve the episodes from mongo
-    def _get_episodes_mongo(self):
-        episodes = None
+            if show is None:
+                show = self.client.get_show(self.show_id)
+                episode_collection = show['episodes']
 
-        try:
-            client = MongoClient()
-            review_db = client['tv_show_reviews']
-            tv_shows_db = review_db['shows']
-            show = tv_shows_db.find({'tile': self.title})
+                for season in episode_collection:
+                    for episode in episode_collection[season]:
+                        self.episodes.append(episode_collection[season][episode])
 
-            if show is not None:
-                episodes = show['episodes']
+                        # movie_mongo = MovieMongo()
+                        # movie_mongo.save_show(self.title, self.episodes)
             else:
-                print('No show titled ' + self.title + ' in mongo.')
-        except RuntimeError:
-            episodes = None
-            print('Error accessing mongo')
-
-        return episodes
-
-    def _save_show(self, episodes, reviews):
-        client = MongoClient()
-        review_db = client['tv_show_reviews']
-        review_db[self.title] = {'episodes': episodes}
+                self.episodes = show['episodes']
+            # print(str(self.episodes))
+            print("episode 0: " + str(self.episodes[0]['title']))
+        return self.episodes
 
     def get_show_reviews(self):
         return self.client.searchShow(self.title)
 
     def get_all_episode_reviews(self):
         reviews = {}
-        episodes = self._get_episodes()
-        print("Type of episodes: " + str(len(episodes)))
-        for episode in self._get_episodes():
-            reviews[episode] = self.get_episode_reviews(episode)
+        movie_mongo = MovieMongo()
+        show = movie_mongo.get_show(self.title)
+
+        if show is None:
+            # episodes = self._get_episodes()
+            episodes = self._get_episodes()
+            episode_data = []
+            index = 0
+            for episode in episodes:
+                # episode = episodes[index]
+                print('id: ' + IMDb().get_imdbID(episode))
+                reviews[episode['title']] = self.get_episode_reviews(IMDb().get_imdbID(episode))
+                episode_data.append({'title': episode['title'],
+                                     'reviews': [review for review in reviews]})
+                print('episode data:\n' + str(episode_data))
+                index += 1
+                if index == 5:
+                    break
+            movie_mongo.save_show(self.title, episode_data['reviews'])
+
+            print("Number of episodes: " + str(len(episodes)))
         return reviews
 
     def get_episode_reviews(self, episode_name):
-        return self.client.searchShow(episode_name)
+        reviews = self.client.get_episode_reviews('tt' + str(episode_name))
+        return [Review(review) for review in reviews]
+
+
+class Review:
+    def __init__(self, imdb_review):
+        self.username = imdb_review.username
+        self.text = imdb_review.text
+        self.date = imdb_review.date
+        self.rating = imdb_review.rating
+        self.summary = imdb_review.summary
+        self.status = imdb_review.status
+        self.user_location = imdb_review.user_location
+        self.user_score = imdb_review.user_score
+        self.user_score_count = imdb_review.user_score_count
 
 
 if __name__ == "__main__":
     tv = TVShow("The Walking Dead")
     tv.get_all_episode_reviews()
+    # client = MovieMongo()
+    # show = client.get_show("The Walking Dead")[0]
+    # print(str(show))
+    # print(show['show_title'])
+    # print(show['episodes'][0].text)
