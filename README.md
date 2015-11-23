@@ -1,4 +1,3 @@
 # AIProject
 CPE 480
-## tv shows, movies n shit
-
+## tv shows, movies n shit!
