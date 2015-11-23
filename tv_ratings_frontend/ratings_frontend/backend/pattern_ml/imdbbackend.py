@@ -16,9 +16,6 @@ import sys
 # Specify optional cache directory, the default is '/tmp/imdbpiecache'
 # imdb = Imdb(cache=True, cache_dir='/tmp/imdbpiecache/')
 
-# TODO create tv show class, save all ids for each episode
-
-
 class ImdbClient:
     def __init__(self):
         self.imdbpy = IMDb()
@@ -69,12 +66,14 @@ class ImdbClient:
 
     def searchShow(self, tvshow):
         title_id = self.get_show_id(tvshow)
+        print(title_id)
         reviews = []
         print(tvshow)
 
         if title_id is not None and title_id != '':
             reviews = self.imdb.get_title_reviews(title_id, max_results=sys.maxint)
             title = self.imdb.get_title_by_id(title_id)
+            print reviews
         else:
             print("Invalid show id")
 
@@ -85,6 +84,8 @@ class ImdbClient:
         title = self.imdb.get_title_by_id(tvshowid)
         return float(title.rating)
 
+    # dont use this, use example from
+    # http://imdbpy.sourceforge.net/docs/README.series.txt
     def get_all_episode_names(self, tvshow):
         result = self.db.search(tvshow, 'en')
         show = result[0]
@@ -123,8 +124,10 @@ class ImdbClient:
 # create review list, for each episode name, call searchshow append
 # call method that trains
 
+# TODO create tv show class, save all ids for each episode
+
 class TVShow:
-    def __init__(self, show_title):
+    def __init__(self, show_title): # option for tvepisode boolean yes or no
         self.client = ImdbClient()
         self.title = show_title
         self.show_id = None
