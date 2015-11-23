@@ -23,7 +23,7 @@ class ImdbClient:
         self.imdb = Imdb(anonymize=True)  # to proxy requests
         self.db = api.TVDB('B43FF87DE395DF56')
 
-    def readFromMongo(self, show, limit):
+    def readShowFromMongo(self, show, limit):
         # Connect to mongo
         client = MongoClient()
 
@@ -135,20 +135,54 @@ class TVShow:
 
     def _get_episodes(self):
         if self.episodes is None:
-            self.episodes = self.client.get_all_episode_names(self.title)
+            self.episodes = list()
+            try:
+                self.episodes = self._get_episodes_mongo()
+            except RuntimeError:
+                # if reviews is None or len(reviews) == 0:
+                self.episodes = self.client.get_all_episode_names(self.title)
+                self._save_show(self.episodes, None)
         return self.episodes
+
+    # retrieve the episodes from mongo
+    def _get_episodes_mongo(self):
+        episodes = None
+
+        try:
+            client = MongoClient()
+            review_db = client['tv_show_reviews']
+            tv_shows_db = review_db['shows']
+            show = tv_shows_db.find({'tile': self.title})
+
+            if show is not None:
+                episodes = show['episodes']
+            else:
+                print('No show titled ' + self.title + ' in mongo.')
+        except RuntimeError:
+            episodes = None
+            print('Error accessing mongo')
+
+        return episodes
+
+    def _save_show(self, episodes, reviews):
+        client = MongoClient()
+        review_db = client['tv_show_reviews']
+        review_db[self.title] = {'episodes': episodes}
 
     def get_show_reviews(self):
         return self.client.searchShow(self.title)
 
     def get_all_episode_reviews(self):
         reviews = {}
+        episodes = self._get_episodes()
+        print("Type of episodes: " + str(len(episodes)))
         for episode in self._get_episodes():
             reviews[episode] = self.get_episode_reviews(episode)
         return reviews
 
     def get_episode_reviews(self, episode_name):
         return self.client.searchShow(episode_name)
+
 
 if __name__ == "__main__":
     tv = TVShow("The Walking Dead")

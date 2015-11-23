@@ -175,7 +175,7 @@ class Classifier:
         for show in possible_shows:
             reviews.append(self.client.searchShow(show))
         self.nb.nb_train_text(reviews)
-        self.nb.nb_classify_tweets(self.tvshow, self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
+        self.nb.nb_classify_tweets(self.tvshow, self.client.readShowFromMongo(parse_show(self.tvshow), sys.maxint))
 
     def nb_train(self):
             reviews = self.client.searchShow(self.tvshow)
@@ -197,7 +197,7 @@ class Classifier:
 
     def nbClassify(self):
         return self.nb.nb_classify_tweets(self.tvshow,
-                                          self.client.readFromMongo(parse_show(self.tvshow), sys.maxint))
+                                          self.client.readShowFromMongo(parse_show(self.tvshow), sys.maxint))
 
 def main(tvshow):
     classifier = Classifier(tvshow)
