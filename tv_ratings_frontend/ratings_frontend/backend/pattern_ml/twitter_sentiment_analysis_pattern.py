@@ -53,7 +53,6 @@ class NBModel:
         self.nb.save_model()
 
     def save_model(self):
-    #    print ""
         self.nb.save('./nb_training.p')
 
     def nb_test_imdb(self, reviews):
