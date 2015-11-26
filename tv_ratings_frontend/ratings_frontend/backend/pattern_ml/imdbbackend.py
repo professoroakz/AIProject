@@ -160,10 +160,20 @@ class MovieMongo:
             review_db = self.mongo['tv_show_reviews']
             for review in reviews:
                 index = review_db['reviews'].count()
+                print('DB index: ' + str(index))
+                print(str(review))
                 review_indices.append(index)
                 review_db['reviews'].save({
                     'id': index,
-                    'review': review})
+                    'text': review.text,
+                    'summary': review.summary,
+                    'rating': review.rating,
+                    'date': review.date,
+                    'username': review.username,
+                    'status': review.status,
+                    'user_location': review.user_location,
+                    'user_score': review.user_score,
+                    'user_score_count': review.user_score_count})
         except RuntimeError:
             print('Error saving reviews')
 
@@ -233,22 +243,22 @@ class TVShow:
                 print('id: ' + IMDb().get_imdbID(episode))
                 reviews[episode['title']] = self.get_episode_reviews(IMDb().get_imdbID(episode))
                 episode_data.append({'title': episode['title'],
-                                     'reviews': [review for review in reviews]})
+                                     'reviews': [review for review in reviews if review is not None]})
                 print('episode data:\n' + str(episode_data))
                 index += 1
                 if index == 5:
                     break
-            movie_mongo.save_show(self.title, episode_data['reviews'])
+            movie_mongo.save_show(self.title, episode_data)
 
             print("Number of episodes: " + str(len(episodes)))
         return reviews
 
     def get_episode_reviews(self, episode_name):
         reviews = self.client.get_episode_reviews('tt' + str(episode_name))
-        return [Review(review) for review in reviews]
+        return [MovieReview(review) for review in reviews]
 
 
-class Review:
+class MovieReview:
     def __init__(self, imdb_review):
         self.username = imdb_review.username
         self.text = imdb_review.text
@@ -259,6 +269,9 @@ class Review:
         self.user_location = imdb_review.user_location
         self.user_score = imdb_review.user_score
         self.user_score_count = imdb_review.user_score_count
+
+    def __str__(self):
+        return self.username + ', ' + self.rating + ', ' + self.text
 
 
 if __name__ == "__main__":
