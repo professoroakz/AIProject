@@ -2,6 +2,8 @@
 
 #use this script to take a copy from our remote to work on nlp and ml locally
 
+mkdir -p ~/movieratings_stream
+
 #create backup on remote machine
 ssh root@107.170.228.84 'cd /tmp && mongodump -o movieratings_stream'
 
