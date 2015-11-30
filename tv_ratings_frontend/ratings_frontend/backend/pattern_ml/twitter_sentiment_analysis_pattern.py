@@ -9,6 +9,7 @@ from numpy import *
 import re
 import nltk
 from nltk.corpus import stopwords
+from imdbbackend import TVShow
 
 # TODO:
 # 1 Train model with ALL imdb data possible for all shows and classify tweets from one show based on this (predicting overall imdb score?)
@@ -159,6 +160,7 @@ class Classifier:
         self.tvshow = tvshow
         self.nb = NBModel()
         self.client = ImdbClient()
+        self.tvShow = TVShow(tvshow)
 
     def classifyAll(self):
         possible_shows = ['Walking Dead', \
@@ -193,7 +195,6 @@ class Classifier:
                 reviews.append(query)
         self.nb.nb_train_text(reviews)
 
-
     def nbClassify(self):
         return self.nb.nb_classify_tweets(self.tvshow,
                                           self.client.readShowFromMongo(parse_show(self.tvshow), sys.maxint))
@@ -202,8 +203,9 @@ def main(tvshow):
     classifier = Classifier(tvshow)
   #  res = classifier.client.get_specific_episode_names(tvshow, 6)
   #  res = classifier.client.get_all_episode_names(tvshow)
-    classifier.nb_train_all_episodes()
-    classifier.nbClassify()
+  #  classifier.nb_train_all_episodes()
+    print classifier.tvShow.get_all_episode_reviews()
+  #  classifier.nbClassify()
 
 if __name__ == "__main__":
     main("The Walking Dead")
