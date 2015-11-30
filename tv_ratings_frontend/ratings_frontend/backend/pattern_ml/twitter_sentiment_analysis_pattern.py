@@ -36,6 +36,7 @@ class NBModel:
 
     def nb_train_text(self, reviews):
         for review in reviews:
+            print review
             if review.rating is not None:# and review.rating < 10 and review.rating > 1:
                 v = Document(review.text, type=int(review.rating), stopwords=True)
                 self.nb.train(v)
@@ -185,14 +186,7 @@ class Classifier:
 
     def nb_train_all_episodes(self):
         # General show specific reviews
-        reviews = self.client.searchShow(self.tvshow)
-        episodeNames = self.client.get_all_episode_names(self.tvshow)
-        for name in episodeNames:
-            episodeShow = name + " " + self.tvshow #(self.tvshow).join(unicodedata.normalize('NFKD', name).encode('ascii', 'ignore'))
-            query = self.client.searchShow(episodeShow)
-            episodeShow = ''
-            if query is not None:
-                reviews.append(query)
+        reviews = self.tvShow.get_all_episode_reviews()
         self.nb.nb_train_text(reviews)
 
     def nbClassify(self):
@@ -203,9 +197,8 @@ def main(tvshow):
     classifier = Classifier(tvshow)
   #  res = classifier.client.get_specific_episode_names(tvshow, 6)
   #  res = classifier.client.get_all_episode_names(tvshow)
-  #  classifier.nb_train_all_episodes()
-    print classifier.tvShow.get_all_episode_reviews()
-  #  classifier.nbClassify()
+    classifier.nb_train_all_episodes()
+    classifier.nbClassify()
 
 if __name__ == "__main__":
     main("The Walking Dead")
