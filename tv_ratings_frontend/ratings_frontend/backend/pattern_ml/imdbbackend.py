@@ -203,14 +203,15 @@ class MovieMongo:
 
     def get_reviews_from_show(self, show):
         review_ids = show['review_ids']
-        reviews = []
+        reviews = {}
         for review_id in review_ids:
             # cur_review =
             show_db = self.mongo[TV_SHOW_DB]
             reviews_collection = show_db[REVIEWS_COLLECTION]
             new_review = reviews_collection.find({'id': review_id})[0]
+            reviews[new_review['episode_title']] = MovieReview.create_from_mongo(new_review)
             print('new review:\n' + str(new_review))
-            reviews.append(MovieReview.create_from_mongo(new_review))
+            # reviews.append()
 
         return reviews
 
