@@ -35,13 +35,12 @@ class NBModel:
             print("Creating new NB model")
 
     def nb_train_text(self, reviews):
-        for review in reviews:
-            print review
-            if review.rating is not None:# and review.rating < 10 and review.rating > 1:
+        for keys, review in reviews.items():
+            if review.rating is not None:
                 v = Document(review.text, type=int(review.rating), stopwords=True)
                 self.nb.train(v)
                 self.nb.save("./nb_training.p")
-                #   print self.nb.classes
+        print self.nb.classes
 
     def nb_train_summary(self, reviews):
         for review in reviews:
@@ -70,8 +69,6 @@ class NBModel:
         tweet_docs = [(self.nb.classify(Document(self.review_to_words(tweet))), self.review_to_words(tweet)) for tweet in tweets]
         for tweet in tweet_docs:
             ratingSum += tweet[0]
-            #print tweet
-           # print tweet
         self.nb_stats()
         Statistics().printStats(tvshow, ratingSum, len(tweet_docs))
         print self.nb.distribution
