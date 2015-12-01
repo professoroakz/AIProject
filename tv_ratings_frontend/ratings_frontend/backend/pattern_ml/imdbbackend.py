@@ -362,9 +362,6 @@ class TVShow:
             else:
                 print('No reviews for episode {0} in show: {1}'.format(episode, self.title))
             index += 1
-            # TODO: REMOVE THIS CHECK
-            if index == 5:
-                break
 
         self.movie_mongo.save_show(self.title, episode_data, show_reviews)
 
