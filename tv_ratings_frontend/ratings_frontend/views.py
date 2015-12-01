@@ -2,7 +2,7 @@ from django.shortcuts import render
 import re
 
 from ratings_frontend.SentimentAnalysis import twitter_sentiment_analysis
-from ratings_frontend.backend.pattern_ml import imdb
+from ratings_frontend.backend.pattern_ml import imdbbackend as imdb
 from ratings_frontend.backend.pattern_ml import twitter_sentiment_analysis_pattern as tsa
 
 # Create your views here.
