@@ -12,6 +12,7 @@
 **/**/target
 
 keys.cfg
+*.p
 
 # Django
 env
