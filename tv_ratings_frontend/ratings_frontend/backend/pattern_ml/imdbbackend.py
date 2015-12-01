@@ -382,13 +382,12 @@ class TVShow:
     def get_all_tweets(self, limit=sys.maxint):
         return self.client.get_tweets_from_mongo(TVShow.parse_show(self.title), limit)
 
-    # retrieves a sample of the last 3 days of tweets
-    def sample_recent_tweets(self):
+    # retrieves a sample of the last days_back days of tweets
+    def sample_recent_tweets(self, days_back):
         now = datetime.utcnow()
-        three_days_ago = now - timedelta(days=3)
+        three_days_ago = now - timedelta(days=days_back)
         tweets = self.movie_mongo.get_tweets_in_range(
             TVShow.parse_show(self.title), three_days_ago, now)
-        print('Sampled tweets:\n' + str(tweets))
         return tweets
 
 
@@ -442,7 +441,7 @@ if __name__ == "__main__":
     arrow = TVShow('Arrow')
     arrow_reviews = arrow.get_all_episode_reviews()
     arrow_overall_reviews = arrow.get_show_reviews()
-    arrow.sample_recent_tweets()
+    arrow.sample_recent_tweets(3)
     # arrow_tweets = arrow.get_tweets()
     # print(str(len(arrow_tweets)))
     # print(str(arrow_overall_reviews[0]))
