@@ -10,7 +10,7 @@ from ratings_frontend.backend.pattern_ml import twitter_sentiment_analysis_patte
 def index(request):
     return render(request, 'ratings_frontend/index.html')
 
-
+# TODO: Update to us TVShow API
 def search(request):
     sentiment = None
     sentiment_analysis = twitter_sentiment_analysis.SentimentAnalysis()
@@ -51,6 +51,7 @@ def search(request):
 
     return render(request, 'ratings_frontend/search.html', context)
 
+# TODO: update to return actual show titles to parse search queries to send to TVShow constructor
 def parse_show(show):
     lower_show = show.lower()
     print('Show: ', show)
