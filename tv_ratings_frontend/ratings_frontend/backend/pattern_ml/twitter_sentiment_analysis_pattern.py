@@ -34,12 +34,20 @@ class NBModel:
             self.new_nb_model = False
             print("Creating new NB model")
 
-    def nb_train_text(self, reviews):
-        for keys, review in reviews.items():
-            if review.rating is not None:
-                v = Document(review.text, type=int(review.rating), stopwords=True)
-                self.nb.train(v)
-                self.nb.save("./nb_training.p")
+    # Feed this with None on any of the params depending on what you want to test on
+    def nb_train_all(self, episodeReviews, generalReviews):
+        if episodeReviews is not None:
+            for keys, review in episodeReviews.items():
+                if review.rating is not None:
+                    v = Document(review.text, type=int(review.rating), stopwords=True)
+                    self.nb.train(v)
+
+        if generalReviews is not None:
+            for review in generalReviews:
+                if review.rating is not None:
+                    v = Document(review.text, type=int(review.rating), stopwords=True)
+                    self.nb.train(v)
+        self.nb.save("./nb_training.p")
         print self.nb.classes
 
     def nb_train_summary(self, reviews):
@@ -183,11 +191,13 @@ class Classifier:
 
     def nb_train_all_episodes(self):
         # General show specific reviews
-        reviews = self.tvShow.get_all_episode_reviews()
-        self.nb.nb_train_text(reviews)
+        episodeReviews = self.tvShow.get_all_episode_reviews()
+        generalReviews = self.tvShow.get_show_reviews()
+        self.nb.nb_train_all(episodeReviews, generalReviews)
 
     def nbClassify(self):
         return self.nb.nb_classify_tweets(self.tvshow,
+
                                           self.client.get_tweets_from_mongo(parse_show(self.tvshow), sys.maxint))
 
 def main(tvshow):

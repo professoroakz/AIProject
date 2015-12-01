@@ -330,10 +330,8 @@ class TVShow:
     # returns a list of reviews for the entire show
     def get_show_reviews(self):
         show = self.movie_mongo.get_show(self.title)
-
         if show is None:
             self._fetch_reviews()
-
         return self.movie_mongo.get_overall_reviews(self.title)
 
     # returns a mapping of episodes to their reviews
