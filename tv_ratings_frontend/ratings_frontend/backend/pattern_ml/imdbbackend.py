@@ -5,7 +5,10 @@ from pymongo import MongoClient
 from pytvdbapi import api
 from fuzzywuzzy import fuzz
 import sys
+from datetime import datetime, date, timedelta
 
+TWEETS_DB = 'movieratings_stream'
+TWEETS = 'tweets'
 TV_SHOW_DB = 'tv_show_reviews'
 SHOW_REVIEWS_COLLECTION = 'show_reviews'
 EPISODE_REVIEWS_COLLECTION = 'episode_reviews'
@@ -248,6 +251,19 @@ class MovieMongo:
 
         return reviews
 
+    # dates must be datetime objects
+    def get_tweets_in_range(self, show_title, start_date, end_date):
+        print('Retrieving tweets for {0} from {1} to {2}'.format(show_title, start_date, end_date))
+        tweets_collection = self.mongo[TWEETS_DB][TWEETS]
+        tweets = tweets_collection.find({
+            'show_title': show_title,
+            'created_at': {
+                '$gte': start_date,
+                '$lte': end_date
+            }
+        })
+        return [tweet for tweet in tweets]
+
 
 # get list of all episode names given a tv show
 # create review list, for each episode name, call searchshow append
@@ -363,8 +379,17 @@ class TVShow:
             print('No reviews found for {0}, episode: {1}'.format(self.title, show_id))
         return reviews
 
-    def get_tweets(self, limit=sys.maxint):
+    def get_all_tweets(self, limit=sys.maxint):
         return self.client.get_tweets_from_mongo(TVShow.parse_show(self.title), limit)
+
+    # retrieves a sample of the last 3 days of tweets
+    def sample_recent_tweets(self):
+        now = datetime.utcnow()
+        three_days_ago = now - timedelta(days=3)
+        tweets = self.movie_mongo.get_tweets_in_range(
+            TVShow.parse_show(self.title), three_days_ago, now)
+        print('Sampled tweets:\n' + str(tweets))
+        return tweets
 
 
 class MovieReview:
@@ -417,6 +442,7 @@ if __name__ == "__main__":
     arrow = TVShow('Arrow')
     arrow_reviews = arrow.get_all_episode_reviews()
     arrow_overall_reviews = arrow.get_show_reviews()
+    arrow.sample_recent_tweets()
     # arrow_tweets = arrow.get_tweets()
     # print(str(len(arrow_tweets)))
     # print(str(arrow_overall_reviews[0]))
