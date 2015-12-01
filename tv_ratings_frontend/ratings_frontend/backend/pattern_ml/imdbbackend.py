@@ -271,6 +271,36 @@ class TVShow:
     def __str__(self):
         return '<TVReview title: \'{0}\' id: {1}>'.format(self.title, self.show_id)
 
+    @staticmethod
+    def parse_show(show_title):
+        lower_show = show_title.lower()
+        possible_shows = ['Walking Dead', \
+                          'Arrow', \
+                          'Family Guy', \
+                          'Big bang Theory', \
+                          'South Park', \
+                          'American Horror Story', \
+                          'Modern Family', \
+                          'Heroes Reborn']
+        if 'walking' in lower_show or 'dead' in lower_show:
+            return possible_shows[0]
+        elif lower_show == 'arrow':
+            return possible_shows[1]
+        elif lower_show == 'family guy' or 'guy' in lower_show:
+            return possible_shows[2]
+        elif 'big' in lower_show or 'bang' in lower_show or 'theory' in lower_show:
+            return possible_shows[3]
+        elif 'south' in lower_show or 'park' in lower_show:
+            return possible_shows[4]
+        elif 'american' in lower_show or 'horror' in lower_show or 'story' in lower_show:
+            return possible_shows[5]
+        elif 'modern' in lower_show:
+            return possible_shows[6]
+        elif 'heroes' in lower_show or 'reborn' in lower_show:
+            return possible_shows[7]
+
+        return 'undertermined'
+
     def _get_episodes(self):
         if self.episodes is None:
             self.episodes = list()
@@ -339,6 +369,9 @@ class TVShow:
             print('No reviews found for {0}, episode: {1}'.format(self.title, show_id))
         return reviews
 
+    def get_tweets(self, limit=sys.maxint):
+        return self.client.readShowFromMongo(TVShow.parse_show(self.title), limit)
+
 
 class MovieReview:
     def __init__(self, imdb_review=None, from_mongo=False):
@@ -390,6 +423,8 @@ if __name__ == "__main__":
     arrow = TVShow('Arrow')
     arrow_reviews = arrow.get_all_episode_reviews()
     arrow_overall_reviews = arrow.get_show_reviews()
-    print(str(arrow_overall_reviews[0]))
+    # arrow_tweets = arrow.get_tweets()
+    # print(str(len(arrow_tweets)))
+    # print(str(arrow_overall_reviews[0]))
     # print(arrow_reviews)
     # print(arrow_overall_reviews)
