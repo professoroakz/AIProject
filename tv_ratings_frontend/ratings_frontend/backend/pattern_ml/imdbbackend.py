@@ -29,7 +29,7 @@ class ImdbClient:
         self.imdb = Imdb(anonymize=True)  # to proxy requests
         self.db = api.TVDB('B43FF87DE395DF56')
 
-    def readShowFromMongo(self, show, limit):
+    def get_tweets_from_mongo(self, show, limit):
         # Connect to mongo
         client = MongoClient()
 
@@ -51,9 +51,6 @@ class ImdbClient:
                 break
         return tweet_text
 
-    def getEpisodeReviews(self, episode_name):
-        return self.searchShow(episode_name)
-
     def get_show_id(self, show_title):
         title_list = list(self.imdb.search_for_title(show_title))
         index = 0
@@ -70,6 +67,7 @@ class ImdbClient:
             index += 1
         return show_id
 
+    # TODO: get rid of usage of this
     def searchShow(self, tvshow):
         title_id = self.get_show_id(tvshow)
         print(title_id)
@@ -78,7 +76,6 @@ class ImdbClient:
 
         if title_id is not None and title_id != '':
             reviews = self.imdb.get_title_reviews(title_id, max_results=sys.maxint)
-            title = self.imdb.get_title_by_id(title_id)
             print reviews
         else:
             print("Invalid show id")
@@ -86,10 +83,7 @@ class ImdbClient:
         return reviews
 
     def fetch_reviews(self, episode_id):
-        reviews = []
         reviews = self.imdb.get_title_reviews(episode_id, max_results=sys.maxint)
-        title = self.imdb.get_title_by_id(episode_id)
-        # print reviews
 
         return reviews
 
@@ -370,7 +364,7 @@ class TVShow:
         return reviews
 
     def get_tweets(self, limit=sys.maxint):
-        return self.client.readShowFromMongo(TVShow.parse_show(self.title), limit)
+        return self.client.get_tweets_from_mongo(TVShow.parse_show(self.title), limit)
 
 
 class MovieReview:
@@ -413,7 +407,7 @@ class MovieReview:
         return new_review
 
 
-# Cache show data in the
+# Cache show data in the database
 if __name__ == "__main__":
     # twd = TVShow("The Walking Dead")
     # twd.get_all_episode_reviews()
