@@ -38,22 +38,21 @@ class NBModel:
     def nb_train_all(self, episodeReviews, generalReviews):
         if episodeReviews is not None:
             for keys, review in episodeReviews.items():
-                if review.rating is not None:
-                    v = Document(review.text, type=int(review.rating), stopwords=True)
+                if review.rating is not None and review.rating > 1 and review.rating < 10:
+                    v = Document(review.text, type=int(review.rating), stopwords=False)
                     self.nb.train(v)
 
         if generalReviews is not None:
             for review in generalReviews:
-                if review.rating is not None:
-                    v = Document(review.text, type=int(review.rating), stopwords=True)
+                if review.rating is not None and review.rating > 1 and review.rating < 10:
+                    v = Document(review.text, type=int(review.rating), stopwords=False)
                     self.nb.train(v)
-        self.nb.save("./nb_training.p")
-        print self.nb.classes
+       # self.nb.save("./nb_training.p")
 
     def nb_train_summary(self, reviews):
         for review in reviews:
-            if review.rating is not None:# and review.rating < 10 and review.rating > 1:
-                v = Document(review.summary, type=int(review.rating), stopwords=True)
+            if review.rating is not None:
+                v = Document(review.summary, type=int(review.rating), stopwords=False)
                 self.nb.train(v)
 
     def nb_train_all_text(self, review_set):
@@ -93,13 +92,13 @@ class NBModel:
         print("Minority: ", self.nb.minority)
 
     def review_to_words(self, raw_review):
-        no_url = re.sub("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", "", raw_review)
+ #       print ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+|RT|rt)"," ",raw_review).split())
 
-        # Remove numerics
-        letters_only = re.sub("[^a-zA-Z]", " ", no_url)
+        no_url_mention_hash = re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+|RT|rt)", " ", raw_review)
+        # letters_only = re.sub("[^a-zA-Z]", " ", no_url)
 
         # to lowercase
-        words = letters_only.lower().split()
+        words = no_url_mention_hash.lower().split()
 
         # remove stop words - the, of , a ....
         stops = set(stopwords.words("english"))
@@ -182,7 +181,7 @@ class Classifier:
         for show in possible_shows:
             reviews.append(self.client.searchShow(show))
         self.nb.nb_train_text(reviews)
-        self.nb.nb_classify_tweets(self.tvshow, self.client.get_tweets_from_mongo(parse_show(self.tvshow), sys.maxint))
+        self.nb.nb_classify_tweets(self.tvshow, self.client.get_tweets_from_mongo(parse_show(self.tvshow), 10))
 
     def nb_train(self):
             reviews = self.client.searchShow(self.tvshow)
