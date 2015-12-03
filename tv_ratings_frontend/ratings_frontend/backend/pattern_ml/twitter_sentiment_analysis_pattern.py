@@ -47,7 +47,7 @@ class NBModel:
                 if review.rating is not None and review.rating > 1 and review.rating < 10:
                     v = Document(review.text, type=int(review.rating), stopwords=False)
                     self.nb.train(v)
-       # self.nb.save("./nb_training.p")
+        self.nb.save("./nb_training.p")
 
     def nb_train_summary(self, reviews):
         for review in reviews:
