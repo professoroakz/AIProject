@@ -9,4 +9,4 @@ CPE 480 @CalPoly SLO. Graded as a 100% (A).
 * Modern Family
 * Arrow
 
-## Accuracy differs, with TWD and BBT with the best scores.
+## Accuracy differs, with TWD and BBT with the best scores :).
