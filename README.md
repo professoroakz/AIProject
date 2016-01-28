@@ -1,4 +1,4 @@
-# AIProject - Netflix & Chill
+# AIProject - Netflix & Predict
 CPE 480 @CalPoly SLO. Graded as a 100% (A).
 ## Using a Naive Bayes model to predict future episode specific as well as overall rating for chosen TV shows such as
 * The Walking Dead
